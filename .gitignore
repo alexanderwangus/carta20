@@ -1,0 +1,7 @@
+.ipynb_checkpoints*
+cs_tracks_notebook_data/*
+untouched*
+cs_tracks.ipynb
+scratchpad.ipynb
+.DS_Store
+__pycache__*

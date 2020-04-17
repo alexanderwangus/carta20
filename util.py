@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import os
 from req_builder import Req, Subreq
+from sklearn.feature_extraction.text import CountVectorizer
+import datetime
 
 DATA_DIR = os.getcwd() + '/cs_tracks_notebook_data/'
 MATRIX_FILE = DATA_DIR + 'crs-qtr.vec'
@@ -9,6 +11,7 @@ VOCAB_FILE = DATA_DIR + 'vocab_crs.txt'
 COURSE_FILE = DATA_DIR + 'courselists/dept-CS.txt'
 STUD_FILE = DATA_DIR + 'studlists/major-CS-BS.txt'
 STRM_FILE = DATA_DIR + 'ID_strms.csv'
+COURSE_MAJOR_FILE = DATA_DIR + 'initial_dataset.fthr'
 
 
 def load_vocab(path):
@@ -131,3 +134,52 @@ def get_tracks_deviation(stud_row, tracknames, tracks, rev_vocab):
     for t in tracknames:
         tracks_dev.append(get_req_deviation(stud_row, tracks[t], rev_vocab))
     return pd.Series(tracks_dev)
+
+
+'''
+Vectorize student course histories.
+Takes in a pandas series of course series and returns a matrix, where
+each row is the given student's vectorized course history.
+
+Returns count vectorizer and said matrix.
+'''
+def vectorize_course_history(srs):
+    course_strings = srs.values.tolist()
+    vectorizer = CountVectorizer()
+    X = vectorizer.fit_transform(course_strings)
+    return vectorizer, X.toarray()
+
+
+def prep_dataset():
+    df = pd.read_feather(COURSE_MAJOR_FILE, use_threads=True)
+    vectorizer, X = vectorize_course_history(df.loc[:, 'course_history'])
+    y = df['DEGREE_1']
+    # train: 2000 -> 2016 inclusive
+    # val: 2017 -> 2018
+    # test: 2019 -> 2020
+    train_date_upper = datetime.date.fromisoformat('2016-12-31')
+    val_date_upper = datetime.date.fromisoformat('2018-12-31')
+    test_date_upper = datetime.date.fromisoformat('2020-12-31')
+
+    train_indices = []
+    val_indices = []
+    test_indices = []
+
+    for index, row in df.iterrows():
+        if row['eff_dt_1']:
+            if row['eff_dt_1'] <= train_date_upper:
+                train_indices.append(index)
+            elif row['eff_dt_1'] <= val_date_upper:
+                val_indices.append(index)
+            else:
+                test_indices.append(index)
+
+    X_train = X[train_indices]
+    X_val = X[val_indices]
+    X_test = X[test_indices]
+
+    y_train = y[train_indices]
+    y_val = y[val_indices]
+    y_test = y[test_indices]
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
