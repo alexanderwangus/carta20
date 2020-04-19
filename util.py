@@ -143,15 +143,26 @@ each row is the given student's vectorized course history.
 
 Returns count vectorizer and said matrix.
 '''
-def vectorize_course_history(srs):
+def vectorize_course_history(srs, vectorizer=None):
     course_strings = srs.values.tolist()
-    vectorizer = CountVectorizer()
-    X = vectorizer.fit_transform(course_strings)
+    if not vectorizer:
+        vectorizer = CountVectorizer()
+        X = vectorizer.fit_transform(course_strings)
+    else:
+        X = vectorizer.transform(course_strings)
     return vectorizer, X.toarray()
 
 
-def prep_dataset():
+def truncate_class(class_string, num_classes):
+    return ','.join(list(class_string.split(','))[:num_classes])  # todo: debug truncation getting rid of numbers in course code CS106A -> CS
+
+
+def prep_dataset(num_classes=-1, num_classes_val=-1):
     df = pd.read_feather(COURSE_MAJOR_FILE, use_threads=True)
+
+    if num_classes > 0:
+        df['course_history'] = df['course_history'].apply(truncate_class, args=[num_classes])
+
     vectorizer, X = vectorize_course_history(df.loc[:, 'course_history'])
     y = df['DEGREE_1']
     # train: 2000 -> 2016 inclusive
@@ -181,5 +192,16 @@ def prep_dataset():
     y_train = y[train_indices]
     y_val = y[val_indices]
     y_test = y[test_indices]
+
+    if num_classes_val > 0:
+        df['course_history'] = df['course_history'].apply(truncate_class, args=[num_classes_val])
+
+    _, X_truncated = vectorize_course_history(df.loc[:, 'course_history'], vectorizer=vectorizer)
+
+    X_val = X_truncated[val_indices]
+    X_test = X_truncated[test_indices]
+
+    y_val = y_val[val_indices]
+    y_test = y_test[test_indices]
 
     return X_train, X_val, X_test, y_train, y_val, y_test
