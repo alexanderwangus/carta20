@@ -5,14 +5,29 @@ from req_builder import Req, Subreq
 from sklearn.feature_extraction.text import CountVectorizer
 import datetime
 
-DATA_DIR = os.getcwd() + '/cs_tracks_notebook_data/'
+DATA_DIR = os.getcwd() + '/data/'
 MATRIX_FILE = DATA_DIR + 'crs-qtr.vec'
 VOCAB_FILE = DATA_DIR + 'vocab_crs.txt'
 COURSE_FILE = DATA_DIR + 'courselists/dept-CS.txt'
 STUD_FILE = DATA_DIR + 'studlists/major-CS-BS.txt'
 STRM_FILE = DATA_DIR + 'ID_strms.csv'
 COURSE_MAJOR_FILE = DATA_DIR + 'initial_dataset.fthr'
+RAW_DATA_FILE = DATA_DIR + 'course_outcomes.tsv'
+COURSE_OUTCOME_LIST_FILE = DATA_DIR + 'course_outcome_lists.csv'
 
+
+MAJOR_LIST = ['BIOE', 'FILM', 'POLSC', 'CEE', 'HUMBI', 'CS', 'MATH', 'LAMER', 'EASST', 'ANSCI', 'AMSTU', 'MODLAN', 'PHYS', 'COMMU', 'ENVSE', 'INTLR', 'HUMAN', 'ASAM', 'DRAMA', 'CLASS', 'VTSS', 'IDMJR', 'PORT', 'ARTHS', 'SOCIS', 'ECON', 'IE', 'GS', 'GEOPH', 'ENVEN', 'IDMHS', 'HSTRY', 'FRENC', 'HUMRTS', 'MATCS', 'CE', 'ERE', 'GLBLST', 'POLSS', 'ENGR', 'ENGLI', 'COMMUS', 'CRWRIT', 'CHEM', 'LING', 'CHICA', 'INSST', 'PUBPO', 'PSYCH', 'FEMST', 'ARCHA', 'AFRAM', 'ETHSO', 'SOCIO', 'AA', 'NATAM', 'MATSC', 'ITAL', 'PHREL', 'PHILO', 'SPAN', 'ENGLF', 'STS', 'URBST', 'EASYS', 'CASA', 'AFRST', 'ANTHS', 'ENGLG', 'JAPAN', 'ENGL', 'MGTSC', 'BIOL', 'PETEN', 'CHILT', 'ANTHR', 'MELLC', 'ART', 'ME', 'CHINE', 'EE', 'FRENI', 'EDUC', 'ARTP', 'RELST', 'BIO', 'ILAC', 'ED', 'MUSIC', 'GERST', 'CSRE', 'FGSS', 'CPLIT', 'CHEME', 'HUMLG', 'SLAV', 'THPST', 'IDSH', 'SYMBO', 'ESTP', 'IDMEN', 'GES', 'AMELLC', 'ENGLS']
+
+NUM_CLASSES = len(MAJOR_LIST) + 1
+
+COURSE_TO_IDX = {MAJOR_LIST[i]: i+1 for i in range(len(MAJOR_LIST))}
+IDX_TO_COURSE = {i+1: MAJOR_LIST[i] for i in range(len(MAJOR_LIST))}
+
+def course_to_idx(course):
+    if course in COURSE_TO_IDX:
+        return COURSE_TO_IDX[course]
+    else:
+        return 0
 
 def load_vocab(path):
     with open(path) as f:
@@ -157,14 +172,13 @@ def truncate_class(class_string, num_classes):
     return ','.join(list(class_string.split(','))[:num_classes])  # todo: debug truncation getting rid of numbers in course code CS106A -> CS
 
 
-def prep_dataset(num_classes=-1, num_classes_val=-1):
+def get_vocab():
     df = pd.read_feather(COURSE_MAJOR_FILE, use_threads=True)
+    print(df['DEGREE_1'].values)
+    return set(df['DEGREE_1'].values)
 
-    if num_classes > 0:
-        df['course_history'] = df['course_history'].apply(truncate_class, args=[num_classes])
 
-    vectorizer, X = vectorize_course_history(df.loc[:, 'course_history'])
-    y = df['DEGREE_1']
+def train_test_split(X, y, df):
     # train: 2000 -> 2016 inclusive
     # val: 2017 -> 2018
     # test: 2019 -> 2020
@@ -193,10 +207,48 @@ def prep_dataset(num_classes=-1, num_classes_val=-1):
     y_val = y[val_indices]
     y_test = y[test_indices]
 
-    if num_classes_val > 0:
-        df['course_history'] = df['course_history'].apply(truncate_class, args=[num_classes_val])
+    return (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices)
 
-    _, X_truncated = vectorize_course_history(df.loc[:, 'course_history'], vectorizer=vectorizer)
+
+def prep_dataset_v2(num_classes_predict=-1):
+    df = pd.read_csv(COURSE_OUTCOME_LIST_FILE)
+
+    y = df['DEGREE_1']
+    X = df.loc[:, 'course_history']
+
+    (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices) = train_test_split(X, y, df)
+
+    if num_classes_predict > 0:
+        df['course_history_truncated'] = df['course_history'].apply(truncate_class, args=[num_classes_predict])
+        X_truncated = df.loc[:, 'course_history_truncated']
+
+        X_val = X_truncated[val_indices]
+        X_test = X_truncated[test_indices]
+
+        y_val = y_val[val_indices]
+        y_test = y_test[test_indices]
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def prep_dataset(num_classes_predict=-1, vectorize=True):
+    df = pd.read_feather(COURSE_MAJOR_FILE, use_threads=True)
+
+    if vectorize:
+        vectorizer, X = vectorize_course_history(df.loc[:, 'course_history'])
+    else:
+        X = df.loc[:, 'course_history']
+    y = df['DEGREE_1']
+
+    (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices) = train_test_split(X, y, df)
+
+    if num_classes_predict > 0:
+        df['course_history'] = df['course_history'].apply(truncate_class, args=[num_classes_predict])
+
+    if vectorize:
+        _, X_truncated = vectorize_course_history(df.loc[:, 'course_history'], vectorizer=vectorizer)
+    else:
+        X_truncated = df.loc[:, 'course_history']
 
     X_val = X_truncated[val_indices]
     X_test = X_truncated[test_indices]
@@ -205,3 +257,10 @@ def prep_dataset(num_classes=-1, num_classes_val=-1):
     y_test = y_test[test_indices]
 
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def main():
+    print(get_vocab())
+
+if __name__ == '__main__':
+    main()
