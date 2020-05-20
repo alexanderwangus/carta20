@@ -34,6 +34,8 @@ class TransformerForecaster(nn.Module):
         max_len = sentences.size(1)
 
         idx = torch.arange(max_len)[None, :, None]
+        if torch.cuda.is_available():
+            idx = idx.cuda()
         lens_expanded = X_lens[:, None, None].expand(sentences.size())  # (batch, max_seq_len, input_size)
         mask = idx >= lens_expanded
         sentences[mask] = 0
