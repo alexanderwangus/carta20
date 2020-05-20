@@ -131,6 +131,7 @@ def train_model(model, course2vec_model, X_train, X_train_lens, y_train, X_val, 
             if torch.cuda.is_available():
                 sentences = sentences.cuda()
                 sentence_lens = sentence_lens.cuda()
+                targets = targets.cuda()
             probs = model(sentences, sentence_lens)
             loss = loss_function(probs, targets)
             loss.backward()
