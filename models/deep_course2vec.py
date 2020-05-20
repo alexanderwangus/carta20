@@ -100,7 +100,7 @@ def get_X_lens_v2(X, vec_size, max_length):
 
 def train_model(model, course2vec_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr):
     if torch.cuda.is_available():
-        model.cuda()
+        model = model.cuda()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
 
