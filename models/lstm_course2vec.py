@@ -12,8 +12,8 @@ import numpy as np
 import copy
 from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2, evaluate_model
 
-TRAIN_LENGTH = 20
-PREDICT_LENGTH = 20
+TRAIN_LENGTH = 5
+PREDICT_LENGTH = 5
 NUM_FEATURES = 3
 
 class LSTMForecaster(nn.Module):
@@ -113,7 +113,7 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=15
+    epochs=30
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 if __name__ == '__main__':
