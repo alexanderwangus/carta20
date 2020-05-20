@@ -52,7 +52,7 @@ class TransformerForecaster(nn.Module):
         out = self.forward(sentence, X_lens)
         predicted = torch.argmax(out, 1)
         if torch.cuda.is_available():
-            predicted = [p[0] for p in predicted]
+            predicted = [t.item() for t in predicted]
         return predicted
 
 
