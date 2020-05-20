@@ -130,6 +130,7 @@ def train_model(model, course2vec_model, X_train, X_train_lens, y_train, X_val, 
             sentence_lens = X_train_lens[i:i+curr_batch_size]
             if torch.cuda.is_available():
                 sentences.cuda()
+                sentence_lens.cuda()
             probs = model(sentences, sentence_lens)
             loss = loss_function(probs, targets)
             loss.backward()
@@ -169,7 +170,9 @@ def evaluate_model(X, X_lens, y, model, ouput_dict=True):
                 curr_batch_size = len(X) - i + 1
 
             sentences = torch.FloatTensor(X[i:i+curr_batch_size])
+            sentence_lens = X_lens[i:i+curr_batch_size]
             if torch.cuda.is_available():
                 sentences.cuda()
-            y_pred += model.predict(sentences, X_lens[i:i+curr_batch_size])
+                sentence_lens.cuda()
+            y_pred += model.predict(sentences, sentence_lens)
         return classification_report(y, y_pred, zero_division=0, output_dict=ouput_dict)
