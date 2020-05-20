@@ -127,7 +127,7 @@ def train_model(model, course2vec_model, X_train, X_train_lens, y_train, X_val, 
 
             targets = torch.LongTensor([util.course_to_idx(course) for course in y_train[i:i+curr_batch_size]])
             sentences = torch.FloatTensor(X_train[i:i+curr_batch_size])
-            sentence_lens = X_train_lens[i:i+curr_batch_size]
+            sentence_lens = torch.LongTensor(X_train_lens[i:i+curr_batch_size])
             if torch.cuda.is_available():
                 sentences.cuda()
                 sentence_lens.cuda()
@@ -170,7 +170,7 @@ def evaluate_model(X, X_lens, y, model, ouput_dict=True):
                 curr_batch_size = len(X) - i + 1
 
             sentences = torch.FloatTensor(X[i:i+curr_batch_size])
-            sentence_lens = X_lens[i:i+curr_batch_size]
+            sentence_lens = torch.LongTensor(X_lens[i:i+curr_batch_size])
             if torch.cuda.is_available():
                 sentences.cuda()
                 sentence_lens.cuda()
