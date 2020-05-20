@@ -10,18 +10,32 @@ import models.logistic_regression_model
 from sklearn.metrics import classification_report
 from ast import literal_eval
 
+
+def to_strlist(l):
+    return [str(x) for x in l]
+
+
+def subtokenize_course_history(course_history):
+    subtokenized = [util.subtokenize_single_course(s) for s in course_history]
+    return [item for sublist in subtokenized for item in sublist]
+
+
 """
 Features can be 'course_history', 'RELATIVE_TERM', or 'CRSE_GRADE_INPUT'
 """
 def create_training_set(dataset=util.COURSE_OUTCOME_LIST_FILE, feature_type='course_history', truncation=-1):
     # df = pd.read_feather(dataset, use_threads=True)
-    df = pd.read_csv(dataset)
+    df = pd.read_pickle(dataset)
     if truncation > 0:
         df = df[:truncation]
 
-    df[feature_type] = df[feature_type].apply(literal_eval)
+    df[feature_type] = df[feature_type].apply(to_strlist)
+    df[feature_type] = df[feature_type].apply(subtokenize_course_history)
+
+    # df[feature_type] = df[feature_type].apply(literal_eval)
     # training_set = [sentence.split(',') for sentence in list(df[feature_type])]
     training_set = list(df[feature_type])
+    print(training_set)
 
     return training_set
 
@@ -37,7 +51,7 @@ def create_model(training_set, vec_size=150, win_size=10, min_count=2):
     return model
 
 
-def train_model(training_set, model_path, vec_size, win_size, min_count, epochs=10):
+def train_course2vec(training_set, model_path, vec_size, win_size, min_count, epochs=10):
     model = create_model(training_set, vec_size, win_size, min_count)
     model.train(training_set, total_examples=len(training_set), epochs=epochs)
     model.save(model_path)
@@ -47,8 +61,11 @@ def train_model(training_set, model_path, vec_size, win_size, min_count, epochs=
 """
 feature_type can be 'course_history', 'RELATIVE_TERM', or 'CRSE_GRADE_INPUT'
 """
-def get_course2vec_model_path(vec_size, win_size, min_count, epochs=10, feature_type="course_history"):
-    return f"course2vec_saved_models/{feature_type}_word2vec_vec{vec_size}_win{win_size}_min{min_count}.model"
+def get_course2vec_model_path(vec_size, win_size, min_count, epochs=10, feature_type="course_history", subtokenized=False):
+    if subtokenized:
+        return f"course2vec_saved_models/subtokenized/{feature_type}_word2vec_vec{vec_size}_win{win_size}_min{min_count}.model"
+    else:
+        return f"course2vec_saved_models/{feature_type}_word2vec_vec{vec_size}_win{win_size}_min{min_count}.model"
 
 
 def get_course_vec(model, word, vec_size):
@@ -101,7 +118,7 @@ def main():
 
     course2vec_model_path = get_course2vec_model_path(vec_size, win_size, min_count, epochs=10, feature_type=feature_type)
     training_set = create_training_set(feature_type=feature_type)
-    course2vec_model = train_model(training_set, course2vec_model_path, vec_size, win_size, min_count, epochs=epochs)
+    course2vec_model = train_course2vec(training_set, course2vec_model_path, vec_size, win_size, min_count, epochs=epochs)
 
 if __name__ == '__main__':
     main()
