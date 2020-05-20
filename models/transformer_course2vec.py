@@ -32,7 +32,6 @@ class TransformerForecaster(nn.Module):
     def forward(self, sentences, X_lens):
         # sentences of size (batch, max_seq_len, input_size)
         max_len = sentences.size(1)
-        X_lens = torch.Tensor(X_lens)
 
         idx = torch.arange(max_len)[None, :, None]
         lens_expanded = X_lens[:, None, None].expand(sentences.size())  # (batch, max_seq_len, input_size)
