@@ -99,6 +99,11 @@ def get_X_lens_v2(X, vec_size, max_length):
 
 
 def train_model(model, course2vec_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr):
+    if torch.cuda.is_available():
+        model.cuda()
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(device)
+
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
@@ -122,7 +127,10 @@ def train_model(model, course2vec_model, X_train, X_train_lens, y_train, X_val, 
 
             targets = torch.LongTensor([util.course_to_idx(course) for course in y_train[i:i+curr_batch_size]])
             sentences = torch.FloatTensor(X_train[i:i+curr_batch_size])
-            probs = model(sentences, X_train_lens[i:i+curr_batch_size])
+            sentence_lens = X_train_lens[i:i+curr_batch_size]
+            if torch.cuda.is_available():
+                sentences.cuda()
+            probs = model(sentences, sentence_lens)
             loss = loss_function(probs, targets)
             loss.backward()
             optimizer.step()
@@ -161,5 +169,7 @@ def evaluate_model(X, X_lens, y, model, ouput_dict=True):
                 curr_batch_size = len(X) - i + 1
 
             sentences = torch.FloatTensor(X[i:i+curr_batch_size])
+            if torch.cuda.is_available():
+                sentences.cuda()
             y_pred += model.predict(sentences, X_lens[i:i+curr_batch_size])
         return classification_report(y, y_pred, zero_division=0, output_dict=ouput_dict)

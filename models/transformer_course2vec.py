@@ -10,16 +10,16 @@ import torch.nn as nn
 import numpy as np
 from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2, evaluate_model
 
-TRAIN_LENGTH = 10
-PREDICT_LENGTH = 10
+TRAIN_LENGTH = 64
+PREDICT_LENGTH = 64
 NUM_FEATURES = 3
 
 
 class TransformerForecaster(nn.Module):
     def __init__(self, input_size, num_classes, num_layers=3, num_heads=5):
         super(TransformerForecaster, self).__init__()
-        self.encoder_layer = nn.TransformerEncoderLayer(input_size, num_heads)
-        self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers)
+        encoder_layers = nn.TransformerEncoderLayer(input_size, num_heads)
+        self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
         self.decoder = nn.Linear(3*input_size, num_classes)
 
         self.init_weights()
