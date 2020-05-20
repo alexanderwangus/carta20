@@ -10,8 +10,8 @@ import torch.nn as nn
 import numpy as np
 from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2, evaluate_model
 
-TRAIN_LENGTH = 64
-PREDICT_LENGTH = 64
+TRAIN_LENGTH = 32
+PREDICT_LENGTH = 32
 NUM_FEATURES = 3
 
 
@@ -31,14 +31,14 @@ class TransformerForecaster(nn.Module):
 
     def forward(self, sentences, X_lens):
         # sentences of size (batch, max_seq_len, input_size)
-        max_len = sentences.size(1)
-
-        idx = torch.arange(max_len)[None, :, None]
-        if torch.cuda.is_available():
-            idx = idx.cuda()
-        lens_expanded = X_lens[:, None, None].expand(sentences.size())  # (batch, max_seq_len, input_size)
-        mask = idx >= lens_expanded
-        sentences[mask] = 0
+        # max_len = sentences.size(1)
+        #
+        # idx = torch.arange(max_len)[None, :, None]
+        # if torch.cuda.is_available():
+        #     idx = idx.cuda()
+        # lens_expanded = X_lens[:, None, None].expand(sentences.size())  # (batch, max_seq_len, input_size)
+        # mask = idx >= lens_expanded
+        # sentences[mask] = 0
 
         output = self.encoder(sentences)  # (batch, max_seq_len, input_size)
         output_max, _ = torch.max(output, dim=1)
@@ -81,8 +81,8 @@ def transformer_course2vec(vec_size, win_size, min_count, epochs, pretrained_tra
     y_val = y_val.values
 
     batch_size = 32
-    num_layers = 6
-    num_heads = 8
+    num_layers = 2
+    num_heads = 5
     lr = 0.001
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, lr, num_heads)
     transformer_model = TransformerForecaster(vec_size * NUM_FEATURES, util.NUM_CLASSES, num_layers=num_layers)
