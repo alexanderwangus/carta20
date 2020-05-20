@@ -10,8 +10,8 @@ import torch.nn as nn
 import numpy as np
 from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2, evaluate_model
 
-TRAIN_LENGTH = 32
-PREDICT_LENGTH = 32
+TRAIN_LENGTH = 5
+PREDICT_LENGTH = 5
 NUM_FEATURES = 3
 
 
