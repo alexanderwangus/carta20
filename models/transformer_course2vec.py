@@ -10,8 +10,8 @@ import torch.nn as nn
 import numpy as np
 from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2, evaluate_model
 
-TRAIN_LENGTH = 5
-PREDICT_LENGTH = 5
+TRAIN_LENGTH = 10
+PREDICT_LENGTH = 10
 NUM_FEATURES = 3
 
 
@@ -108,7 +108,7 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=1
+    epochs=30
     transformer_course2vec(vec_size, win_size, min_count, epochs, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
