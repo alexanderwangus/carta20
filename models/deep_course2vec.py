@@ -103,7 +103,7 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
         model = model.cuda()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if verbose:
-    print(f"Training on {device}")
+        print(f"Training on {device}")
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=lr)
