@@ -214,17 +214,18 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         dp = hyperparams[3]
         d_ff = hyperparams[4]
         lr = hyperparams[5]
+        config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lf}
 
         transformer_model = train_transformer(epochs, data, vs, batch_size, nl, nh, lr,\
             num_tokens, dp, d_ff)
 
-        print(f"Running trial with vec_size: {vec_size}, win_size: {win_size}, min_count: {min_count}")
+        print(f"Running trial with {config}")
         metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True)['macro avg']['f1-score']
 
         if metric > best_metric:
             print(f"New best metric of {metric} to beat old metric of {best_metric} found.")
             best_metric = metric
-            best_config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lf}
+            best_config = config
             print(f"New best config: {best_config}")
             best_model = copy.deepcopy(model)
         print("\n")
