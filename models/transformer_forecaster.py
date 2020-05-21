@@ -187,30 +187,20 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     batch_size = 32
-    epochs = 1
+    epochs = 30
 
     num_layers = [1, 2, 3]
     num_heads = [2, 4, 8]
     vec_size = [64, 128, 256]
     dropout=[0.1, 0.2, 0.3, 0.4]
     dim_feedforward=[56, 128, 256, 512, 1024, 2048]
-    lrs = [0.0001, 0.0005, 0.001]
-
-    num_layers = [1, 2]
-    num_heads = [2, 4]
-    vec_size = [32]
-    dropout=[0.1]
-    dim_feedforward=[56]
-    lrs = [0.0001, 0.0005]
-
+    lrs = [0.0001, 0.0005, 0.001, 0.002]
 
     best_metric = -1
     best_config = {}
     best_model = None
 
     for hyperparams in itertools.product(num_layers, num_heads, vec_size, dropout, dim_feedforward, lrs):
-        print(f"Running trial with num_layers: {hyperparams[0]}, num_heads: {hyperparams[1]}, vec_size: {hyperparams[2]}, dropout: {hyperparams[3]}, dim_feedforward: {hyperparams[4]}, lr: {hyperparams[5]}")
-
         nl = hyperparams[0]
         nh = hyperparams[1]
         vs = hyperparams[2]
@@ -218,11 +208,11 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         d_ff = hyperparams[4]
         lr = hyperparams[5]
         config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lr}
+        print(f"Running trial with {config}")
 
         transformer_model = train_transformer(epochs, data, vs, batch_size, nl, nh, lr,\
             num_tokens, dp, d_ff, verbose=False)
 
-        print(f"Running trial with {config}")
         metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True)['macro avg']['f1-score']
 
         if metric > best_metric:
