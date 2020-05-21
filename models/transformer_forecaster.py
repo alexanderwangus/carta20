@@ -17,7 +17,7 @@ PREDICT_LENGTH = 5
 
 
 class TransformerForecaster(nn.Module):
-    def __init__(self, embed_size, vocab_sizes, num_classes, num_layers=3, num_heads=5):
+    def __init__(self, embed_size, vocab_sizes, num_classes, num_layers=3, num_heads=5, dropout=0.2, dim_feedforward=128):
         super(TransformerForecaster, self).__init__()
 
         n_course_tokens, n_term_tokens, n_grade_tokens = vocab_sizes
@@ -25,7 +25,7 @@ class TransformerForecaster(nn.Module):
         self.term_embedder = nn.Embedding(n_term_tokens, embed_size)
         self.grade_embedder = nn.Embedding(n_grade_tokens, embed_size)
 
-        encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=128, dropout=0.2)
+        encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=dim_feedforward, dropout=dropout)
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
         self.decoder = nn.Linear(3 * 3 *  embed_size, num_classes)
@@ -112,8 +112,8 @@ def featurize_data(X, course_torchtext, term_torchtext, grade_torchtext, max_len
     return np.concatenate([X_course_history, X_term, X_grade], axis=2)
 
 
-def run_transformer_forecaster(epochs, pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False):
-    print(f"\nRunning transformer with epochs={epochs}, num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
+def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False):
+    print(f"\nRunning transformer with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
     print(f"subtokenize = {subtokenize}, augmentation = {augment}")
 
     _, X_val, X_test, _, y_val, y_test = util.prep_dataset_v2(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=augment)
@@ -147,17 +147,20 @@ def run_transformer_forecaster(epochs, pretrained_transformer=False, training_se
     num_layers = 2
     num_heads = 5
     vec_size = 50
+    dropout=0.2
+    dim_feedforward=128
     lr = 0.001
+    num_tokens = (n_course_tokens, n_term_tokens, n_grade_tokens)
+    data = (X_train, X_train_lens, y_train, X_val, X_val_lens, y_val)
+
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr)
-    transformer_model = TransformerForecaster(vec_size, (n_course_tokens, n_term_tokens, n_grade_tokens), util.NUM_CLASSES, num_layers=num_layers, num_heads=num_heads)
 
     if pretrained_transformer:
         print(f"Loading pretrained transformer state_dict from '{transformer_model_path}'")
         transformer_model.load_state_dict(torch.load(transformer_model_path))
     else:
-        print(f"Training transformer")
-        transformer_model = train_model(transformer_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
-            epochs, batch_size, lr)
+        transformer_model = train_transformer(data, vec_size, batch_size, num_layers, num_heads, lr,\
+            num_tokens, dropout, dim_feedforward)
 
         print(f"Saving transformer to '{transformer_model_path}'")
         with open(transformer_model_path, 'wb') as f:
@@ -167,13 +170,29 @@ def run_transformer_forecaster(epochs, pretrained_transformer=False, training_se
     print(val_results)
 
 
+
+def train_transformer(data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward):
+
+    epochs=1
+    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
+
+    transformer_model = TransformerForecaster(vec_size, num_tokens, \
+        util.NUM_CLASSES, num_layers=num_layers, num_heads=num_heads, dropout=dropout, dim_feedforward=dim_feedforward)
+
+    print(f"Training transformer")
+    transformer_model = train_model(transformer_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
+        epochs, batch_size, lr)
+
+    return transformer_model
+
+
+
 def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr):
     return f"transformer_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_heads{num_heads}_lr{lr}_seq_len{TRAIN_LENGTH}.model"
 
 
 def main():
-    epochs=10
-    run_transformer_forecaster(epochs, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
