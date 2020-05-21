@@ -28,7 +28,7 @@ class TransformerForecaster(nn.Module):
         encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=128, dropout=0.2)
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
-        self.decoder = nn.Linear(3 * embed_size, num_classes)
+        self.decoder = nn.Linear(3 * 3 *  embed_size, num_classes)
 
         self.init_weights()
 
@@ -57,10 +57,10 @@ class TransformerForecaster(nn.Module):
         output = torch.cat([course_output, grade_output, term_output], dim=2)
 
         output = self.encoder(output)  # (batch, max_seq_len, 3 * embed_size)
-        # output_max, _ = torch.max(output, dim=1)
-        # output_min, _ = torch.min(output, dim=1)
-        # output = torch.cat([torch.mean(output, dim=1), output_max, output_min], dim=1)
-        output = self.decoder(output[:,-1,:].squeeze())
+        output_max, _ = torch.max(output, dim=1)
+        output_min, _ = torch.min(output, dim=1)
+        output = torch.cat([torch.mean(output, dim=1), output_max, output_min], dim=1)
+        output = self.decoder(output)
 
         return output
 
@@ -78,7 +78,7 @@ def dummy_tokenizer(l):
 
 
 def get_torchtext(X, tokenizer):
-    torchtext_data = torchtext.data.Field(tokenize=tokenizer, eos_token='<eos>')
+    torchtext_data = torchtext.data.Field(tokenize=tokenizer)
     torchtext_data.build_vocab(X)
     return torchtext_data
 
