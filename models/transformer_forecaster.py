@@ -230,7 +230,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
             best_metric = metric
             best_config = config
             print(f"New best config: {best_config}")
-            best_model = copy.deepcopy(model)
+            best_model = copy.deepcopy(transformer_model)
         print("\n")
 
     print(f"Best config found: {best_config}")
