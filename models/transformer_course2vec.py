@@ -15,7 +15,7 @@ PREDICT_LENGTH = 5
 NUM_FEATURES = 3
 
 
-class TransformerForecaster(nn.Module):
+class TransformerClassifier(nn.Module):
     def __init__(self, input_size, num_classes, num_layers=3, num_heads=5):
         super(TransformerForecaster, self).__init__()
         encoder_layers = nn.TransformerEncoderLayer(input_size, num_heads)
@@ -73,9 +73,9 @@ def transformer_course2vec(vec_size, win_size, min_count, epochs, pretrained_tra
     _, X_val, X_test, _, y_val, y_test = util.prep_dataset_v2(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
     X_train, _, _, y_train, _, _ = util.prep_dataset_v2(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
 
-    X_train_lens = get_X_lens_v2(X_train, vec_size, TRAIN_LENGTH)
+    X_train_lens = get_X_lens_v2(X_train, TRAIN_LENGTH)
     X_train = featurize_student_v2(X_train, course2vec_params, TRAIN_LENGTH, subtokenize=False)
-    X_val_lens = get_X_lens_v2(X_val, vec_size, PREDICT_LENGTH)
+    X_val_lens = get_X_lens_v2(X_val, PREDICT_LENGTH)
     X_val = featurize_student_v2(X_val, course2vec_params, PREDICT_LENGTH, subtokenize=False)
     y_train = y_train.values
     y_val = y_val.values
@@ -92,7 +92,7 @@ def transformer_course2vec(vec_size, win_size, min_count, epochs, pretrained_tra
         transformer_model.load_state_dict(torch.load(transformer_model_path))
     else:
         print(f"Training transformer")
-        transformer_model = train_model(transformer_model, course2vec_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
+        transformer_model = train_model(transformer_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
             epochs, batch_size, lr)
 
         print(f"Saving transformer to '{transformer_model_path}'")
@@ -104,7 +104,7 @@ def transformer_course2vec(vec_size, win_size, min_count, epochs, pretrained_tra
 
 
 def get_transformer_model_path(input_size, batch_size, num_layers, lr, num_heads):
-    return f"transformer_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_heads{num_heads}_lr{lr}_seq_len{TRAIN_LENGTH}.model"
+    return f"transformer_course2vec_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_heads{num_heads}_lr{lr}_seq_len{TRAIN_LENGTH}.model"
 
 
 def main():

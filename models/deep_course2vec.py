@@ -91,14 +91,14 @@ def get_seq_len(course_list, max_length):
     return min(max_length, len(course_list))
 
 
-def get_X_lens(X, vec_size, max_length):
+def get_X_lens(X, max_length):
     return [get_seq_len(seq.split(','), max_length) for _, seq in X.items()]
 
-def get_X_lens_v2(X, vec_size, max_length):
+def get_X_lens_v2(X, max_length):
     return [get_seq_len(seq, max_length) for _, seq in X["course_history"].items()]
 
 
-def train_model(model, course2vec_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr):
+def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr):
     if torch.cuda.is_available():
         model = model.cuda()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
