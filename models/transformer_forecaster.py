@@ -173,10 +173,9 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=False)
     print(val_results)
 
-def hyperparam_sweep()
 
 def train_transformer(data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward):
-    epochs=1
+    epochs=10
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     transformer_model = TransformerForecaster(vec_size, num_tokens, \
