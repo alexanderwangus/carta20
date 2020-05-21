@@ -181,7 +181,9 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
 def hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, augment=False):
     print(f"\nRunning hyperparam search with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
     print(f"subtokenize = {subtokenize}, augmentation = {augment}")
+    
     data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment)
+    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     batch_size = 32
     epochs = 1
