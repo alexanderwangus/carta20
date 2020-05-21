@@ -161,7 +161,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     lr = 0.001
 
 
-    transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr)
+    transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr, dropout, dim_feedforward)
 
     if pretrained_transformer:
         print(f"Loading pretrained transformer state_dict from '{transformer_model_path}'")
@@ -220,7 +220,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lr}
 
         transformer_model = train_transformer(epochs, data, vs, batch_size, nl, nh, lr,\
-            num_tokens, dp, d_ff)
+            num_tokens, dp, d_ff, verbose=False)
 
         print(f"Running trial with {config}")
         metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True)['macro avg']['f1-score']
@@ -234,27 +234,28 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         print("\n")
 
     print(f"Best config found: {best_config}")
-    transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr)
+    transformer_model_path = get_transformer_model_path(vs, batch_size, nl, nh, lr, dp, d_ff)
     print(f"Saving transformer to '{transformer_model_path}'")
     with open(transformer_model_path, 'wb') as f:
         torch.save(best_model.state_dict(), f)
 
 
-def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward):
+def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True):
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     transformer_model = TransformerForecaster(vec_size, num_tokens, \
         util.NUM_CLASSES, num_layers=num_layers, num_heads=num_heads, dropout=dropout, dim_feedforward=dim_feedforward)
 
-    print(f"Training transformer")
+    if verbose:
+        print(f"Training transformer")
     transformer_model = train_model(transformer_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
-        epochs, batch_size, lr)
+        epochs, batch_size, lr, verbose=verbose)
 
     return transformer_model
 
 
-def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr):
-    return f"transformer_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_heads{num_heads}_lr{lr}_seq_len{TRAIN_LENGTH}.model"
+def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr, dropout, dim_ff):
+    return f"transformer_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_heads{num_heads}_lr{lr}_seq_len{TRAIN_LENGTH}_dropout{dropout}_dimff_{dim_ff}.model"
 
 
 def main():

@@ -98,7 +98,7 @@ def get_X_lens_v2(X, max_length):
     return [get_seq_len(seq, max_length) for _, seq in X["course_history"].items()]
 
 
-def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr):
+def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr, verbose=True):
     if torch.cuda.is_available():
         model = model.cuda()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -108,10 +108,11 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
     val_results = evaluate_model(X_val, X_val_lens, y_val, model)
-    print(f"== Pre-training val results (macro avg) ==")
-    print(f"  Precision: {val_results['macro avg']['precision']}")
-    print(f"  Recall: {val_results['macro avg']['recall']}")
-    print(f"  f1-score: {val_results['macro avg']['f1-score']}\n")
+    if verbose:
+        print(f"== Pre-training val results (macro avg) ==")
+        print(f"  Precision: {val_results['macro avg']['precision']}")
+        print(f"  Recall: {val_results['macro avg']['recall']}")
+        print(f"  f1-score: {val_results['macro avg']['f1-score']}\n")
 
     best_metric = -1
     best_model = None
@@ -137,21 +138,23 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
             loss.backward()
             optimizer.step()
 
-
-        train_results = evaluate_model(X_train, X_train_lens, y_train, model)
-        print(f"== Epoch {epoch+1} train results (macro avg) ==")
-        print(f"  Precision: {train_results['macro avg']['precision']}")
-        print(f"  Recall: {train_results['macro avg']['recall']}")
-        print(f"  f1-score: {train_results['macro avg']['f1-score']}")
+        if verbose:
+            train_results = evaluate_model(X_train, X_train_lens, y_train, model)
+            print(f"== Epoch {epoch+1} train results (macro avg) ==")
+            print(f"  Precision: {train_results['macro avg']['precision']}")
+            print(f"  Recall: {train_results['macro avg']['recall']}")
+            print(f"  f1-score: {train_results['macro avg']['f1-score']}")
 
         val_results = evaluate_model(X_val, X_val_lens, y_val, model)
-        print(f"== Epoch {epoch+1} val results (macro avg) ==")
-        print(f"  Precision: {val_results['macro avg']['precision']}")
-        print(f"  Recall: {val_results['macro avg']['recall']}")
-        print(f"  f1-score: {val_results['macro avg']['f1-score']}\n")
+        if verbose:
+            print(f"== Epoch {epoch+1} val results (macro avg) ==")
+            print(f"  Precision: {val_results['macro avg']['precision']}")
+            print(f"  Recall: {val_results['macro avg']['recall']}")
+            print(f"  f1-score: {val_results['macro avg']['f1-score']}\n")
 
         if val_results['macro avg']['f1-score'] > best_metric:
-            print(f"New best model found with f1-score {val_results['macro avg']['f1-score']} beating previous value of {best_metric}")
+            if verbose:
+                print(f"New best model found with f1-score {val_results['macro avg']['f1-score']} beating previous value of {best_metric}")
             best_model = copy.deepcopy(model)
             best_metric = val_results['macro avg']['f1-score']
 
