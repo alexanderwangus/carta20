@@ -214,7 +214,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         dp = hyperparams[3]
         d_ff = hyperparams[4]
         lr = hyperparams[5]
-        config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lf}
+        config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lr}
 
         transformer_model = train_transformer(epochs, data, vs, batch_size, nl, nh, lr,\
             num_tokens, dp, d_ff)
