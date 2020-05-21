@@ -25,7 +25,7 @@ class TransformerForecaster(nn.Module):
         self.term_embedder = nn.Embedding(n_term_tokens, embed_size)
         self.grade_embedder = nn.Embedding(n_grade_tokens, embed_size)
 
-        encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads)
+        encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=512, dropout=0.2)
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
         self.decoder = nn.Linear(3 * 3 * embed_size, num_classes)
@@ -146,7 +146,7 @@ def run_transformer_forecaster(epochs, pretrained_transformer=False, training_se
     batch_size = 32
     num_layers = 2
     num_heads = 5
-    vec_size = 150
+    vec_size = 50
     lr = 0.001
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr)
     transformer_model = TransformerForecaster(vec_size, (n_course_tokens, n_term_tokens, n_grade_tokens), util.NUM_CLASSES, num_layers=num_layers, num_heads=num_heads)
@@ -172,7 +172,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    epochs=1
+    epochs=50
     run_transformer_forecaster(epochs, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
