@@ -12,7 +12,7 @@ import numpy as np
 import torchtext
 
 
-TRAIN_LENGTH = 5
+TRAIN_LENGTH = 64
 PREDICT_LENGTH = 5
 
 
@@ -25,10 +25,10 @@ class TransformerForecaster(nn.Module):
         self.term_embedder = nn.Embedding(n_term_tokens, embed_size)
         self.grade_embedder = nn.Embedding(n_grade_tokens, embed_size)
 
-        encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=512, dropout=0.2)
+        encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=128, dropout=0.2)
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
-        self.decoder = nn.Linear(3 * 3 * embed_size, num_classes)
+        self.decoder = nn.Linear(3 * embed_size, num_classes)
 
         self.init_weights()
 
@@ -57,10 +57,10 @@ class TransformerForecaster(nn.Module):
         output = torch.cat([course_output, grade_output, term_output], dim=2)
 
         output = self.encoder(output)  # (batch, max_seq_len, 3 * embed_size)
-        output_max, _ = torch.max(output, dim=1)
-        output_min, _ = torch.min(output, dim=1)
-        output = torch.cat([torch.mean(output, dim=1), output_max, output_min], dim=1)
-        output = self.decoder(output)
+        # output_max, _ = torch.max(output, dim=1)
+        # output_min, _ = torch.min(output, dim=1)
+        # output = torch.cat([torch.mean(output, dim=1), output_max, output_min], dim=1)
+        output = self.decoder(output[:,-1,:].squeeze())
 
         return output
 
@@ -172,7 +172,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    epochs=50
+    epochs=10
     run_transformer_forecaster(epochs, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
