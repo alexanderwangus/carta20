@@ -170,7 +170,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
         with open(transformer_model_path, 'wb') as f:
             torch.save(transformer_model.state_dict(), f)
 
-    X_train, _, y_train, X_val, _, y_val = data
+    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
     val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=False)
     print(val_results)
 
