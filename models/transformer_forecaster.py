@@ -112,10 +112,7 @@ def featurize_data(X, course_torchtext, term_torchtext, grade_torchtext, max_len
     return np.concatenate([X_course_history, X_term, X_grade], axis=2)
 
 
-def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False):
-    print(f"\nRunning transformer with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
-    print(f"subtokenize = {subtokenize}, augmentation = {augment}")
-
+def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False):
     _, X_val, X_test, _, y_val, y_test = util.prep_dataset_v2(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=augment)
     X_train, _, _, y_train, _, _ = util.prep_dataset_v2(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
 
@@ -142,6 +139,14 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     y_train = y_train.values
     y_val = y_val.values
 
+    return (X_train, X_train_lens, y_train, X_val, X_val_lens, y_val), (n_course_tokens, n_term_tokens, n_grade_tokens)
+
+
+def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False):
+    print(f"\nRunning transformer with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
+    print(f"subtokenize = {subtokenize}, augmentation = {augment}")
+
+    data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment)
 
     batch_size = 32
     num_layers = 2
@@ -150,8 +155,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     dropout=0.2
     dim_feedforward=128
     lr = 0.001
-    num_tokens = (n_course_tokens, n_term_tokens, n_grade_tokens)
-    data = (X_train, X_train_lens, y_train, X_val, X_val_lens, y_val)
+
 
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr)
 
@@ -169,10 +173,9 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=False)
     print(val_results)
 
-
+def hyperparam_sweep()
 
 def train_transformer(data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward):
-
     epochs=1
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
