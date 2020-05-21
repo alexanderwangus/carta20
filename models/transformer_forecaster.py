@@ -5,7 +5,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import util
 from gensim.models import Word2Vec
 from course_embeddings.course2vec import get_course2vec_model_path
-from deep_course2vec import subtokenize_features, get_X_lens_v2, train_model
+from deep_course2vec import subtokenize_features, get_X_lens_v2, train_model, evaluate_model
 import torch
 import torch.nn as nn
 import numpy as np

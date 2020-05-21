@@ -158,7 +158,6 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
     return best_model
 
 def evaluate_model(X, X_lens, y, model, ouput_dict=True):
-    # TODO: batchify so not all of X_val is fed in at once
     model.eval()
     batch_size = 32
 
