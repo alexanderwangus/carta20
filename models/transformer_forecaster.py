@@ -194,7 +194,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     vec_size = [64, 128]
     dropout=[0.3]
     dim_feedforward=[1024, 2048]
-    lrs = [0.0001, 0.0005]
+    lrs = [0.0005, 0.001]
 
     best_metric = -1
     best_config = {}
