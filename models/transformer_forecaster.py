@@ -189,12 +189,12 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     batch_size = 32
     epochs = 30
 
-    num_layers = [1, 2, 3]
+    num_layers = [2, 3]
     num_heads = [2, 4, 8]
-    vec_size = [64, 128, 256]
-    dropout=[0.1, 0.2, 0.3, 0.4]
-    dim_feedforward=[56, 128, 256, 512, 1024, 2048]
-    lrs = [0.0001, 0.0005, 0.001, 0.002]
+    vec_size = [64, 128]
+    dropout=[0.3]
+    dim_feedforward=[1024, 2048]
+    lrs = [0.0001, 0.0005]
 
     best_metric = -1
     best_config = {}
@@ -214,12 +214,12 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
             num_tokens, dp, d_ff, verbose=False)
 
         metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True)['macro avg']['f1-score']
+        print(f"Achieved metric of {metric}.")
 
         if metric > best_metric:
             print(f"New best metric of {metric} to beat old metric of {best_metric} found.")
             best_metric = metric
             best_config = config
-            print(f"New best config: {best_config}")
             best_model = copy.deepcopy(transformer_model)
         print("\n")
 
@@ -254,3 +254,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+"""
+Running trial with {'num_layers': 1, 'num_heads': 2, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.001}
+New best metric of 0.09864412282533642 to beat old metric of 0.09732932026453754 found.
+"""
