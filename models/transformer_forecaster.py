@@ -130,7 +130,7 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
 
 
     X_train_lens = get_X_lens_v2(X_train, TRAIN_LENGTH)
-    X_val_lens = get_X_lens_v2(X_val, TRAIN_LENGTH)
+    X_val_lens = get_X_lens_v2(X_val, PREDICT_LENGTH)
 
     if subtokenize:
         X_train = subtokenize_features(X_train)
