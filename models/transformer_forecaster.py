@@ -52,13 +52,21 @@ class TransformerForecaster(nn.Module):
         term_sentences = sentences[:, :, 1]
         grade_sentences = sentences[:, :, 2]
 
+        max_len = sentences.size(1)
+
+        idx = torch.arange(max_len)[None, :]
+        if torch.cuda.is_available():
+            idx = idx.cuda()
+        lens_expanded = X_lens[:, None]
+        mask = idx >= lens_expanded
+
         course_output = self.course_embedder(course_sentences)  # (batch, max_seq_len, embed_size)
         grade_output = self.grade_embedder(grade_sentences)
         term_output = self.term_embedder(term_sentences)
 
         output = torch.cat([course_output, grade_output, term_output], dim=2)
 
-        output = self.encoder(output)  # (batch, max_seq_len, 3 * embed_size)
+        output = self.encoder(output, mask)  # (batch, max_seq_len, 3 * embed_size)
         output_max, _ = torch.max(output, dim=1)
         output_min, _ = torch.min(output, dim=1)
         output = torch.cat([torch.mean(output, dim=1), output_max, output_min], dim=1)
@@ -153,12 +161,12 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     batch_size = 32
     epochs = 1
 
-    num_layers = 2
-    num_heads = 5
-    vec_size = 50
-    dropout=0.2
-    dim_feedforward=128
-    lr = 0.001
+    num_layers = 3
+    num_heads = 4
+    vec_size = 64
+    dropout=0.3
+    dim_feedforward=2048
+    lr = 0.0001
 
 
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr, dropout, dim_feedforward)
@@ -194,7 +202,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     vec_size = [64, 128]
     dropout=[0.3]
     dim_feedforward=[1024, 2048]
-    lrs = [0.0005, 0.001]
+    lrs = [0.0001, 0.0005, 0.001]
 
     best_metric = -1
     best_config = {}
@@ -249,13 +257,31 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
     main()
 
 """
+TODO:
+- masking
+- normal results
+- augmented results
+- subtokenization results
+
 Running trial with {'num_layers': 1, 'num_heads': 2, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.001}
 New best metric of 0.09864412282533642 to beat old metric of 0.09732932026453754 found.
+
+Running trial with {'num_layers': 2, 'num_heads': 2, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 1024, 'lr': 0.0005}
+Achieved metric of 0.09932391054672786.
+New best metric of 0.09932391054672786 to beat old metric of 0.08274642248680052 found.
+
+Running trial with {'num_layers': 3, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.0001}
+Achieved metric of 0.09252411611960847.
+New best metric of 0.09252411611960847 to beat old metric of 0.09016540821002031 found.
+
+Running trial with {'num_layers': 3, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.0001}
+Achieved metric of 0.09252411611960847.
+New best metric of 0.09252411611960847 to beat old metric of 0.09016540821002031 found.
 """
