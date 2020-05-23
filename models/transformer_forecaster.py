@@ -197,7 +197,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     batch_size = 32
-    epochs = 20
+    epochs = 30
 
     num_layers = [1, 2, 3]
     num_heads = [2, 4]
