@@ -199,7 +199,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     batch_size = 32
     epochs = 30
 
-    num_layers = [2, 3]
+    num_layers = [1, 2, 3]
     num_heads = [2, 4]
     vec_size = [64, 128]
     dropout=[0.2, 0.3]
