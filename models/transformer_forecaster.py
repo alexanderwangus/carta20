@@ -54,11 +54,12 @@ class TransformerForecaster(nn.Module):
 
         max_len = sentences.size(1)
 
-        idx = torch.arange(max_len)[None, :]
+        idx = torch.arange(max_len)[None, :]  # (1, max_seq_len)
         if torch.cuda.is_available():
             idx = idx.cuda()
-        lens_expanded = X_lens[:, None]
+        lens_expanded = X_lens[:, None]  # (batch, 1)
         mask = idx >= lens_expanded
+        # print(mask.size())
 
         course_output = self.course_embedder(course_sentences)  # (batch, max_seq_len, embed_size)
         grade_output = self.grade_embedder(grade_sentences)
@@ -66,7 +67,7 @@ class TransformerForecaster(nn.Module):
 
         output = torch.cat([course_output, grade_output, term_output], dim=2)
 
-        output = self.encoder(output, mask)  # (batch, max_seq_len, 3 * embed_size)
+        output = self.encoder(output, src_key_padding_mask=mask)  # (batch, max_seq_len, 3 * embed_size)
         output_max, _ = torch.max(output, dim=1)
         output_min, _ = torch.min(output, dim=1)
         output = torch.cat([torch.mean(output, dim=1), output_max, output_min], dim=1)
