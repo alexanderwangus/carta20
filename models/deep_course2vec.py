@@ -164,6 +164,8 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
 def evaluate_model(X, X_lens, y, model, ouput_dict=True):
     model.eval()
     batch_size = 32
+    print(len(X))
+    print(len(X_lens))
 
     with torch.no_grad():
         y = torch.LongTensor([util.course_to_idx(course) for course in y])
