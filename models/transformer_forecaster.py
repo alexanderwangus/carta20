@@ -200,11 +200,11 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     epochs = 30
 
     num_layers = [2, 3]
-    num_heads = [2, 4, 8]
+    num_heads = [2, 4]
     vec_size = [64, 128]
-    dropout=[0.3]
+    dropout=[0.2, 0.3]
     dim_feedforward=[1024, 2048]
-    lrs = [0.0001, 0.0005, 0.001]
+    lrs = [0.0001, 0.0005]
 
     best_metric = -1
     best_config = {}
@@ -240,7 +240,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         torch.save(best_model.state_dict(), f)
 
 
-def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True):
+def hyperparam_search(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True):
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     transformer_model = TransformerForecaster(vec_size, num_tokens, \
