@@ -65,8 +65,8 @@ class TransformerForecaster(nn.Module):
         grade_output = self.grade_embedder(grade_sentences)
         term_output = self.term_embedder(term_sentences)
 
-        output = output.transpose(0, 1)
         output = torch.cat([course_output, grade_output, term_output], dim=2)
+        output = output.transpose(0, 1)
 
         output = self.encoder(output, src_key_padding_mask=mask)  # (max_seq_len, batch, 3 * embed_size)
         output_max, _ = torch.max(output, dim=0)
