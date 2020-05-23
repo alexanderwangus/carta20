@@ -240,7 +240,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         torch.save(best_model.state_dict(), f)
 
 
-def hyperparam_search(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True):
+def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True):
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     transformer_model = TransformerForecaster(vec_size, num_tokens, \
@@ -259,7 +259,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
