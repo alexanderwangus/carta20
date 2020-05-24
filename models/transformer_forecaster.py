@@ -15,7 +15,7 @@ import copy
 
 
 TRAIN_LENGTH = 64
-PREDICT_LENGTH = 5
+PREDICT_LENGTH = 10
 
 
 class TransformerForecaster(nn.Module):
@@ -201,11 +201,11 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     batch_size = 32
     epochs = 30
 
-    num_layers = [1, 2, 3]
+    num_layers = [1, 2, 4, 6]
     num_heads = [2, 4]
     vec_size = [64, 128]
     dropout=[0.2, 0.3]
-    dim_feedforward=[1024, 2048]
+    dim_feedforward=[1024, 2048, 40128]
     lrs = [0.0001, 0.0005]
 
     best_metric = -1
@@ -261,7 +261,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    hyperparam_search(subtokenize=True, augment=True, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
@@ -277,4 +277,7 @@ TODO:
 Running trial with {'num_layers': 1, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.2, 'dim_feedforward': 1024, 'lr': 0.0005}
 Achieved metric of 0.0947345292136418.
 New best metric of 0.0947345292136418 to beat old metric of 0.08644299260486957 found.
+
+
+ {'num_layers': 1, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.0005}
 """
