@@ -163,12 +163,12 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     batch_size = 32
     epochs = 30
 
-    num_layers = 3
+    num_layers = 1
     num_heads = 4
     vec_size = 64
-    dropout=0.3
-    dim_feedforward=2048
-    lr = 0.0001
+    dropout=0.2
+    dim_feedforward=1024
+    lr = 0.0005
 
 
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr, dropout, dim_feedforward)
@@ -259,7 +259,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
@@ -272,18 +272,7 @@ TODO:
 - augmented results
 - subtokenization results
 
-Running trial with {'num_layers': 1, 'num_heads': 2, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.001}
-New best metric of 0.09864412282533642 to beat old metric of 0.09732932026453754 found.
-
-Running trial with {'num_layers': 2, 'num_heads': 2, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 1024, 'lr': 0.0005}
-Achieved metric of 0.09932391054672786.
-New best metric of 0.09932391054672786 to beat old metric of 0.08274642248680052 found.
-
-Running trial with {'num_layers': 3, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.0001}
-Achieved metric of 0.09252411611960847.
-New best metric of 0.09252411611960847 to beat old metric of 0.09016540821002031 found.
-
-Running trial with {'num_layers': 3, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.0001}
-Achieved metric of 0.09252411611960847.
-New best metric of 0.09252411611960847 to beat old metric of 0.09016540821002031 found.
+Running trial with {'num_layers': 1, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.2, 'dim_feedforward': 1024, 'lr': 0.0005}
+Achieved metric of 0.0947345292136418.
+New best metric of 0.0947345292136418 to beat old metric of 0.08644299260486957 found.
 """
