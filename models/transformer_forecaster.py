@@ -14,7 +14,7 @@ import itertools
 import copy
 
 
-TRAIN_LENGTH = 64
+TRAIN_LENGTH = 10
 PREDICT_LENGTH = 10
 
 
