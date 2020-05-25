@@ -163,12 +163,12 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     batch_size = 32
     epochs = 30
 
-    num_layers = 1
+    num_layers = 6
     num_heads = 4
-    vec_size = 64
+    vec_size = 128
     dropout=0.2
-    dim_feedforward=1024
-    lr = 0.0005
+    dim_feedforward=2048
+    lr = 0.0001
 
 
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr, dropout, dim_feedforward)
@@ -201,28 +201,31 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     batch_size = 32
     epochs = 30
 
-    num_layers = [1, 2, 4, 6]
-    num_heads = [2, 4]
-    vec_size = [64, 128]
+    batch_sizes = [8, 16, 32, 64, 128]
+    num_layers = [6]
+    num_heads = [4]
+    vec_size = [128]
     dropout=[0.2, 0.3]
-    dim_feedforward=[1024, 2048, 40128]
-    lrs = [0.0001, 0.0005]
+    dim_feedforward=[1024, 2048, 4128]
+    lrs = [0.00001, 0.00005, 0.0001]
 
     best_metric = -1
     best_config = {}
     best_model = None
 
-    for hyperparams in itertools.product(num_layers, num_heads, vec_size, dropout, dim_feedforward, lrs):
+    for hyperparams in itertools.product(num_layers, num_heads, vec_size, dropout, dim_feedforward, lrs, batch_sizes):
         nl = hyperparams[0]
         nh = hyperparams[1]
         vs = hyperparams[2]
         dp = hyperparams[3]
         d_ff = hyperparams[4]
         lr = hyperparams[5]
-        config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lr}
+        bs = hyperparams[6]
+
+        config = {"num_layers": nl, "num_heads": nh, "vec_size": vs, "dropout": dp, "dim_feedforward": d_ff, "lr": lr, "batch_size": bs}
         print(f"Running trial with {config}")
 
-        transformer_model = train_transformer(epochs, data, vs, batch_size, nl, nh, lr,\
+        transformer_model = train_transformer(epochs, data, vs, bs, nl, nh, lr,\
             num_tokens, dp, d_ff, verbose=False)
 
         metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True)['macro avg']['f1-score']
@@ -236,7 +239,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         print("\n")
 
     print(f"Best config found: {best_config}")
-    transformer_model_path = get_transformer_model_path(vs, batch_size, nl, nh, lr, dp, d_ff)
+    transformer_model_path = get_transformer_model_path(vs, bs, nl, nh, lr, dp, d_ff)
     print(f"Saving transformer to '{transformer_model_path}'")
     with open(transformer_model_path, 'wb') as f:
         torch.save(best_model.state_dict(), f)
