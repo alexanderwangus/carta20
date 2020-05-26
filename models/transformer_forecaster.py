@@ -33,7 +33,9 @@ class TransformerForecaster(nn.Module):
         self.decoder = nn.Linear(3 * 3 * embed_size, embed_size)
 
         self.relu = nn.ReLU()
-        self.linear = nn.Linear(embed_size, num_classes)
+        self.dropout = nn.dropout()
+        self.linear_1 = nn.Linear(embed_size, embed_size)
+        self.linear_2 = nn.Linear(embed_size, num_classes)
 
         self.init_weights()
 
@@ -77,7 +79,8 @@ class TransformerForecaster(nn.Module):
         output = torch.cat([torch.mean(output, dim=0), output_max, output_min], dim=1)
         output = self.decoder(output)
 
-        output = self.linear(self.relu(output))
+        output = self.linear_1(self.relu(output))
+        output = self.linear_2(self.dropout(self.relu(output)))
 
         return output
 
