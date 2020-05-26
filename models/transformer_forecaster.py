@@ -160,15 +160,15 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
 
     data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment)
 
-    batch_size = 32
+    batch_size = 8
     epochs = 30
 
     num_layers = 6
     num_heads = 4
     vec_size = 128
-    dropout=0.2
+    dropout=0.3
     dim_feedforward=2048
-    lr = 0.0001
+    lr = 1e-5
 
 
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr, dropout, dim_feedforward)
@@ -199,9 +199,9 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     batch_size = 32
-    epochs = 30
+    epochs = 5
 
-    batch_sizes = [8]
+    batch_sizes = [32]
     num_layers = [6]
     num_heads = [4]
     vec_size = [128]
