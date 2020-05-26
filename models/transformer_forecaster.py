@@ -81,9 +81,9 @@ class TransformerForecaster(nn.Module):
         # output_max, _ = torch.max(output, dim=0)
         # output_min, _ = torch.min(output, dim=0)
         # output = torch.cat([torch.mean(output, dim=0), output_max, output_min], dim=1)
-        output = self.decoder(output)
+        output, (h_n, c_n) = self.decoder(output)
 
-        output = self.linear_1(output[-1])
+        output = self.linear_1(h_n[-1])
         # output = self.linear_2(self.relu(output))
 
         return output
