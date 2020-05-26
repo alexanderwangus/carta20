@@ -205,7 +205,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     num_layers = [6]
     num_heads = [4]
     vec_size = [128]
-    dropout=[0.2, 0.3]
+    dropout=[0.2]
     dim_feedforward=[2048, 4128]
     lrs = [0.00001, 0.00005]
 
