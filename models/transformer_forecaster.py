@@ -33,7 +33,7 @@ class TransformerForecaster(nn.Module):
         self.decoder = nn.Linear(3 * 3 * embed_size, embed_size)
 
         self.relu = nn.ReLU()
-        self.dropout = nn.dropout()
+        self.dropout = nn.Dropout()
         self.linear_1 = nn.Linear(embed_size, embed_size)
         self.linear_2 = nn.Linear(embed_size, num_classes)
 
