@@ -42,13 +42,16 @@ class TransformerForecaster(nn.Module):
 
 
     def init_weights(self):
-        initrange = 0.1
+        initrange = 0.01
         self.course_embedder.weight.data.uniform_(-initrange, initrange)
         self.grade_embedder.weight.data.uniform_(-initrange, initrange)
         self.term_embedder.weight.data.uniform_(-initrange, initrange)
 
-        self.decoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
+        self.linear_1.bias.data.zero_()
+        self.linear_1.weight.data.uniform_(-initrange, initrange)
+
+        # self.decoder.bias.data.zero_()
+        # self.decoder.weight.data.uniform_(-initrange, initrange)
 
 
     def forward(self, sentences, X_lens):
