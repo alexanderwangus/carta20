@@ -30,7 +30,10 @@ class TransformerForecaster(nn.Module):
         encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=dim_feedforward, dropout=dropout)
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
-        self.decoder = nn.Linear(3 * 3 *  embed_size, num_classes)
+        self.decoder = nn.Linear(3 * 3 * embed_size, embed_size)
+
+        self.relu = nn.ReLU()
+        self.linear = nn.Linear(embed_size, num_classes)
 
         self.init_weights()
 
@@ -73,6 +76,8 @@ class TransformerForecaster(nn.Module):
         output_min, _ = torch.min(output, dim=0)
         output = torch.cat([torch.mean(output, dim=0), output_max, output_min], dim=1)
         output = self.decoder(output)
+
+        output = self.linear(self.relu(output))
 
         return output
 
@@ -264,7 +269,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(subtokenize=True, augment=True, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    run_transformer_forecaster(subtokenize=False, augment=False, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
