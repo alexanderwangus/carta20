@@ -160,12 +160,12 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
 
     data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment)
 
-    batch_size = 8
+    batch_size = 32
     epochs = 30
 
-    num_layers = 6
+    num_layers = 1
     num_heads = 4
-    vec_size = 128
+    vec_size = 64
     dropout=0.3
     dim_feedforward=2048
     lr = 1e-5
