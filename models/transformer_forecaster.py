@@ -201,13 +201,13 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     batch_size = 32
     epochs = 30
 
-    batch_sizes = [8, 16, 32, 64, 128]
+    batch_sizes = [8]
     num_layers = [6]
     num_heads = [4]
     vec_size = [128]
     dropout=[0.2, 0.3]
-    dim_feedforward=[1024, 2048, 4128]
-    lrs = [0.00001, 0.00005, 0.0001]
+    dim_feedforward=[2048, 4128]
+    lrs = [0.00001, 0.00005]
 
     best_metric = -1
     best_config = {}
