@@ -31,11 +31,12 @@ class TransformerForecaster(nn.Module):
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
         # self.decoder = nn.Linear(3 * 3 * embed_size, embed_size)
-        self.decoder = nn.LSTM(3 * embed_size, 150, 1)
+        self.lstm_hidden_size = 512
+        self.decoder = nn.LSTM(3 * embed_size, self.lstm_hidden_size, 1)
 
         self.relu = nn.ReLU()
-        self.linear_1 = nn.Linear(embed_size, embed_size)
-        self.linear_2 = nn.Linear(embed_size, num_classes)
+        self.linear_1 = nn.Linear(self.lstm_hidden_size, num_classes)
+        # self.linear_2 = nn.Linear(embed_size, num_classes)
 
         self.init_weights()
 
@@ -79,8 +80,8 @@ class TransformerForecaster(nn.Module):
         # output = torch.cat([torch.mean(output, dim=0), output_max, output_min], dim=1)
         output = self.decoder(output)
 
-        output = self.linear_1(self.relu(output))
-        output = self.linear_2(self.relu(output))
+        output = self.linear_1(output[-1])
+        # output = self.linear_2(self.relu(output))
 
         return output
 
