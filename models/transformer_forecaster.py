@@ -182,8 +182,8 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     num_heads = 4
     vec_size = 64
     dropout=0.3
-    dim_feedforward=2048
-    lr = 5e-5
+    dim_feedforward=1024
+    lr = 5e-4
 
 
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr, dropout, dim_feedforward)
