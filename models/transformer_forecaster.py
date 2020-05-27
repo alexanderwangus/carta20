@@ -148,6 +148,8 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
     if subtokenize:
         X_train = subtokenize_features(X_train)
         X_val = subtokenize_features(X_val)
+        X_train_lens = get_X_lens_v2(X_train, -1)
+        X_val_lens = get_X_lens_v2(X_val, -1)
 
     course_torchtext = get_torchtext(X_train["course_history"], dummy_tokenizer)
     n_course_tokens = len(course_torchtext.vocab.stoi)

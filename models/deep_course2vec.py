@@ -88,7 +88,10 @@ def featurize_student_v2(X, course2vec_params, max_length, training_sets=None, s
 
 def get_seq_len(course_list, max_length):
     # course_list = course_str.split(',')
-    return min(max_length, len(course_list))
+    if max_length > 0:
+        return min(max_length, len(course_list))
+    else:
+        return len(course_list)
 
 
 def get_X_lens(X, max_length):
