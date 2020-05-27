@@ -77,6 +77,7 @@ class TransformerForecaster(nn.Module):
         output = torch.cat([course_output, grade_output, term_output], dim=2)
         output = output.transpose(0, 1)
 
+        self.encoder.flatten_parameters()
         output = self.encoder(output, src_key_padding_mask=mask)  # (max_seq_len, batch, 3 * embed_size)
         # output_max, _ = torch.max(output, dim=0)
         # output_min, _ = torch.min(output, dim=0)
@@ -180,7 +181,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     vec_size = 64
     dropout=0.3
     dim_feedforward=2048
-    lr = 1e-4
+    lr = 5e-5
 
 
     transformer_model_path = get_transformer_model_path(vec_size, batch_size, num_layers, num_heads, lr, dropout, dim_feedforward)
@@ -276,7 +277,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(subtokenize=False, augment=False, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    run_transformer_forecaster(subtokenize=True, augment=True, pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
