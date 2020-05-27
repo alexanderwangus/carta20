@@ -77,11 +77,11 @@ class TransformerForecaster(nn.Module):
         output = torch.cat([course_output, grade_output, term_output], dim=2)
         output = output.transpose(0, 1)
 
-        self.encoder.flatten_parameters()
         output = self.encoder(output, src_key_padding_mask=mask)  # (max_seq_len, batch, 3 * embed_size)
         # output_max, _ = torch.max(output, dim=0)
         # output_min, _ = torch.min(output, dim=0)
         # output = torch.cat([torch.mean(output, dim=0), output_max, output_min], dim=1)
+        self.decoder.flatten_parameters()
         output, (h_n, c_n) = self.decoder(output)
 
         output = self.linear_1(h_n[-1])
