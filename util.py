@@ -290,6 +290,20 @@ def subtokenize_single_course(course_str):
     return items
 
 
+# returns list of subtokens
+def subtokenize_single_course_v2(course_str):
+    match = re.match(r"([^0-9]+)([0-9]+)([^0-9]*)", course_str, re.I)
+    items = list(match.groups())
+    items[1] = items[1] + items[2]
+
+    if items[-1] == "":
+        items = items[:-1]
+
+    print(items)
+
+    return items
+
+
 def main():
     print(get_vocab())
 

@@ -30,7 +30,7 @@ def subtokenize_feautures_row(row):
     grades = row["CRSE_GRADE_INPUT"]
 
     # note: can speed up by returning list of lists of sizes, and use that to vector op expansions of terms and grades
-    subtokenized_courses = [util.subtokenize_single_course(course) for course in courses]
+    subtokenized_courses = [util.subtokenize_single_course_v2(course) for course in courses]
     expansion_amounts = [len(l) for l in subtokenized_courses]
     expanded_terms = expand(terms, expansion_amounts)
     expanded_grades = expand(grades, expansion_amounts)
