@@ -30,7 +30,7 @@ def subtokenize_feautures_row(row):
     grades = row["CRSE_GRADE_INPUT"]
 
     # note: can speed up by returning list of lists of sizes, and use that to vector op expansions of terms and grades
-    subtokenized_courses = [util.subtokenize_single_course_v2(course) for course in courses]
+    subtokenized_courses = [util.subtokenize_single_course(course) for course in courses]
     expansion_amounts = [len(l) for l in subtokenized_courses]
     expanded_terms = expand(terms, expansion_amounts)
     expanded_grades = expand(grades, expansion_amounts)
@@ -101,7 +101,7 @@ def get_X_lens_v2(X, max_length):
     return [get_seq_len(seq, max_length) for _, seq in X["course_history"].items()]
 
 
-def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr, verbose=True):
+def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr, verbose=True, categories=False):
     if torch.cuda.is_available():
         model = model.cuda()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -111,7 +111,7 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    val_results = evaluate_model(X_val, X_val_lens, y_val, model)
+    val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories)
     if verbose:
         print(f"== Pre-training val results (macro avg) ==")
         print(f"  Precision: {val_results['macro avg']['precision']}")
@@ -130,7 +130,11 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
 
             optimizer.zero_grad()
 
-            targets = torch.LongTensor([util.course_to_idx(course) for course in y_train[i:i+curr_batch_size]])
+            if categories:
+                targets = torch.LongTensor([util.category_to_idx(course) for course in y_train[i:i+curr_batch_size]])
+            else:
+                targets = torch.LongTensor([util.course_to_idx(course) for course in y_train[i:i+curr_batch_size]])
+
             sentences = torch.FloatTensor(X_train[i:i+curr_batch_size])
             sentence_lens = torch.LongTensor(X_train_lens[i:i+curr_batch_size])
             if torch.cuda.is_available():
@@ -143,13 +147,13 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
             optimizer.step()
 
         if verbose:
-            train_results = evaluate_model(X_train, X_train_lens, y_train, model)
+            train_results = evaluate_model(X_train, X_train_lens, y_train, model, categories=categories)
             print(f"== Epoch {epoch+1} train results (macro avg) ==")
             print(f"  Precision: {train_results['macro avg']['precision']}")
             print(f"  Recall: {train_results['macro avg']['recall']}")
             print(f"  f1-score: {train_results['macro avg']['f1-score']}")
 
-        val_results = evaluate_model(X_val, X_val_lens, y_val, model)
+        val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories)
         if verbose:
             print(f"== Epoch {epoch+1} val results (macro avg) ==")
             print(f"  Precision: {val_results['macro avg']['precision']}")
@@ -164,12 +168,15 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
 
     return best_model
 
-def evaluate_model(X, X_lens, y, model, ouput_dict=True):
+def evaluate_model(X, X_lens, y, model, ouput_dict=True, categories=False):
     model.eval()
     batch_size = 32
 
     with torch.no_grad():
-        y = torch.LongTensor([util.course_to_idx(course) for course in y])
+        if categories:
+            y = torch.LongTensor([util.category_to_idx(course) for course in y])
+        else:
+            y = torch.LongTensor([util.course_to_idx(course) for course in y])
         y_pred = []
         for i in range(0, len(X), batch_size):
             curr_batch_size = batch_size

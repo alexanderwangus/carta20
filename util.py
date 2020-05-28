@@ -16,20 +16,35 @@ COURSE_MAJOR_FILE = DATA_DIR + 'initial_dataset.fthr'
 RAW_DATA_FILE = DATA_DIR + 'course_outcomes.tsv'
 COURSE_OUTCOME_LIST_FILE = DATA_DIR + 'course_outcome_lists.pkl'
 COURSE_OUTCOME_LIST_FILE_AUGMENTED = DATA_DIR + 'course_outcome_lists_augmented_2.pkl'
+DEGREE_CATEGORY_FILE = DATA_DIR + 'degree_to_degree_category.csv'
 
 
 MAJOR_LIST = ['BIOE', 'FILM', 'POLSC', 'CEE', 'HUMBI', 'CS', 'MATH', 'LAMER', 'EASST', 'ANSCI', 'AMSTU', 'MODLAN', 'PHYS', 'COMMU', 'ENVSE', 'INTLR', 'HUMAN', 'ASAM', 'DRAMA', 'CLASS', 'VTSS', 'IDMJR', 'PORT', 'ARTHS', 'SOCIS', 'ECON', 'IE', 'GS', 'GEOPH', 'ENVEN', 'IDMHS', 'HSTRY', 'FRENC', 'HUMRTS', 'MATCS', 'CE', 'ERE', 'GLBLST', 'POLSS', 'ENGR', 'ENGLI', 'COMMUS', 'CRWRIT', 'CHEM', 'LING', 'CHICA', 'INSST', 'PUBPO', 'PSYCH', 'FEMST', 'ARCHA', 'AFRAM', 'ETHSO', 'SOCIO', 'AA', 'NATAM', 'MATSC', 'ITAL', 'PHREL', 'PHILO', 'SPAN', 'ENGLF', 'STS', 'URBST', 'EASYS', 'CASA', 'AFRST', 'ANTHS', 'ENGLG', 'JAPAN', 'ENGL', 'MGTSC', 'BIOL', 'PETEN', 'CHILT', 'ANTHR', 'MELLC', 'ART', 'ME', 'CHINE', 'EE', 'FRENI', 'EDUC', 'ARTP', 'RELST', 'BIO', 'ILAC', 'ED', 'MUSIC', 'GERST', 'CSRE', 'FGSS', 'CPLIT', 'CHEME', 'HUMLG', 'SLAV', 'THPST', 'IDSH', 'SYMBO', 'ESTP', 'IDMEN', 'GES', 'AMELLC', 'ENGLS']
 
+CATEGORY_LIST = ['EARTHSCI', 'EDUCATION', 'ENGR', 'H&S', 'H&S-HUM&ART', 'H&S-INTERDISC', 'H&S-NATSCI', 'H&S-SOCSCI', 'H&S-RESEARCH', 'INDIVIDUAL', 'INTERDISC', 'MEDICINE', 'UNDECLARED', 'OTHER']
+
 NUM_CLASSES = len(MAJOR_LIST) + 1
+NUM_CATEGORIES = len(CATEGORY_LIST) + 1
 
 COURSE_TO_IDX = {MAJOR_LIST[i]: i+1 for i in range(len(MAJOR_LIST))}
 IDX_TO_COURSE = {i+1: MAJOR_LIST[i] for i in range(len(MAJOR_LIST))}
+
+CATEGORY_TO_IDX = {CATEGORY_LIST[i]: i+1 for i in range(len(CATEGORY_LIST))}
+IDX_TO_CATEGORY = {i+1: CATEGORY_LIST[i] for i in range(len(CATEGORY_LIST))}
 
 def course_to_idx(course):
     if course in COURSE_TO_IDX:
         return COURSE_TO_IDX[course]
     else:
         return 0
+
+
+def category_to_idx(category):
+    if category in CATEGORY_TO_IDX:
+        return CATEGORY_TO_IDX[category]
+    else:
+        return 0
+
 
 def load_vocab(path):
     with open(path) as f:
@@ -298,6 +313,24 @@ def subtokenize_single_course_v2(course_str):
     items = items[:-1]
 
     return items
+
+"""
+takes in list of majors and outputs list of degree categories
+"""
+def degrees_to_categories(y):
+    categories_df = pd.read_csv(DEGREE_CATEGORY_FILE)
+    categories_dict = pd.Series(categories_df.DEGREE_CATEGORY.values, index=categories_df.DEGREE).to_dict()
+    print(categories_dict)
+    y_categories = [degrees_to_categories_single(c, categories_dict) for c in y]
+    print(y_categories)
+    return y_categories
+
+
+def degrees_to_categories_single(c, dict):
+    if c in dict:
+        return dict[c]
+    else:
+        return 'OTHER'
 
 
 def main():
