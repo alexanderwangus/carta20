@@ -185,7 +185,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     num_heads = 4
     vec_size = 64
     dropout=0.2
-    dim_feedforward=1024
+    dim_feedforward=2048
     lr = 0.0005
 
 
@@ -205,7 +205,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
             torch.save(transformer_model.state_dict(), f)
 
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
-    val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=False)
+    val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=False, categories=categories)
     print(val_results)
 
 
