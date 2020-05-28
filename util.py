@@ -238,9 +238,8 @@ def train_test_split(X, y, df):
 
 def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False):
     df_train = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
-    df_val = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
-    df_test = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
-
+    df_val = pd.read_pickle(COURSE_OUTCOME_LIST_VAL_FILE)
+    df_test = pd.read_pickle(COURSE_OUTCOME_LIST_TEST_FILE)
 
     y_train = df_train['ACAD_PLAN_1']
     y_val = df_val['ACAD_PLAN_1']
