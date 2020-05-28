@@ -289,7 +289,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(subtokenize=True, augment=False, categories=False,\
+    run_transformer_forecaster(subtokenize=False, augment=False, categories=False,\
     pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
