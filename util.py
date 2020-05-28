@@ -320,9 +320,7 @@ takes in list of majors and outputs list of degree categories
 def degrees_to_categories(y):
     categories_df = pd.read_csv(DEGREE_CATEGORY_FILE)
     categories_dict = pd.Series(categories_df.DEGREE_CATEGORY.values, index=categories_df.DEGREE).to_dict()
-    print(categories_dict)
     y_categories = [degrees_to_categories_single(c, categories_dict) for c in y]
-    print(y_categories)
     return y_categories
 
 
