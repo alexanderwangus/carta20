@@ -253,6 +253,14 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
     X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(lambda x: x.split(' '))
     X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(lambda x: x.split(' '))
 
+    X_val['course_history'] = X_val['course_history'].apply(lambda x: x.split(' '))
+    X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(lambda x: x.split(' '))
+    X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(lambda x: x.split(' '))
+
+    X_test['course_history'] = X_test['course_history'].apply(lambda x: x.split(' '))
+    X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(lambda x: x.split(' '))
+    X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(lambda x: x.split(' '))
+
 
     if num_classes_train > 0:
         X_train['course_history'] = X_train['course_history'].apply(truncate_class_v2, args=[num_classes_train])
@@ -267,10 +275,6 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
         X_test['course_history'] = X_test['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
         X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
         X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
-
-    print(X_train)
-    print(y_train)
-
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
