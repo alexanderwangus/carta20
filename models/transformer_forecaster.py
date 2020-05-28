@@ -15,7 +15,7 @@ import copy
 
 
 TRAIN_LENGTH = 64
-PREDICT_LENGTH = 5
+PREDICT_LENGTH = 10
 
 
 class TransformerForecaster(nn.Module):
@@ -196,6 +196,8 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
         transformer_model = TransformerForecaster(vec_size, num_tokens, \
             util.NUM_CLASSES, num_layers=num_layers, num_heads=num_heads, dropout=dropout, dim_feedforward=dim_feedforward)
         transformer_model.load_state_dict(torch.load(transformer_model_path))
+        if torch.cuda.is_available():
+            transformer_model = transformer_model.cuda()
     else:
         transformer_model = train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr,\
             num_tokens, dropout, dim_feedforward, categories=categories)
@@ -283,7 +285,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 def main():
     run_transformer_forecaster(subtokenize=False, augment=False, categories=False,\
-    pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    pretrained_transformer=True, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':
