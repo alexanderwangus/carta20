@@ -14,8 +14,8 @@ import itertools
 import copy
 
 
-TRAIN_LENGTH = 64
-PREDICT_LENGTH = 10
+TRAIN_LENGTH = 5
+PREDICT_LENGTH = 5
 
 
 class TransformerForecaster(nn.Module):
@@ -151,6 +151,7 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
         X_train_lens = get_X_lens_v2(X_train, -1)
         X_val_lens = get_X_lens_v2(X_val, -1)
 
+
     course_torchtext = get_torchtext(X_train["course_history"], dummy_tokenizer)
     n_course_tokens = len(course_torchtext.vocab.stoi)
 
@@ -163,11 +164,15 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
     X_train = featurize_data(X_train, course_torchtext, term_torchtext, grade_torchtext, TRAIN_LENGTH)
     X_val = featurize_data(X_val, course_torchtext, term_torchtext, grade_torchtext, PREDICT_LENGTH)
 
+    print(X_train[0])
+
+
     y_train = y_train.values
     y_val = y_val.values
     if categories:
         y_train = util.degrees_to_categories(y_train)
         y_val = util.degrees_to_categories(y_val)
+
 
     return (X_train, X_train_lens, y_train, X_val, X_val_lens, y_val), (n_course_tokens, n_term_tokens, n_grade_tokens)
 
@@ -284,8 +289,8 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(subtokenize=False, augment=False, categories=False,\
-    pretrained_transformer=True, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    run_transformer_forecaster(subtokenize=True, augment=False, categories=False,\
+    pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
 if __name__ == '__main__':

@@ -249,6 +249,10 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
     X_val = df_val.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
     X_test = df_test.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
 
+    X_train['course_history'] = X_train['course_history'].apply(lambda x: x.split(' '))
+    X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(lambda x: x.split(' '))
+    X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(lambda x: x.split(' '))
+
 
     if num_classes_train > 0:
         X_train['course_history'] = X_train['course_history'].apply(truncate_class_v2, args=[num_classes_train])
