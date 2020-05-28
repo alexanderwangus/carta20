@@ -268,6 +268,9 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
         X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
         X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
 
+    print(X_train[0])
+    print(y_train[0])
+
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 

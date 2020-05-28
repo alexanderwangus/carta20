@@ -164,8 +164,6 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
     X_train = featurize_data(X_train, course_torchtext, term_torchtext, grade_torchtext, TRAIN_LENGTH)
     X_val = featurize_data(X_val, course_torchtext, term_torchtext, grade_torchtext, PREDICT_LENGTH)
 
-    print(X_train[0])
-
 
     y_train = y_train.values
     y_val = y_val.values
