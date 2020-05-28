@@ -174,7 +174,7 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
 
 def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False, categories=False):
     print(f"\nRunning transformer with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
-    print(f"subtokenize = {subtokenize}, augmentation = {augment}, degree categories = "categories)
+    print(f"subtokenize = {subtokenize}, augmentation = {augment}, degree categories = {categories})
 
     data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment, categories=categories)
 
