@@ -138,8 +138,8 @@ def featurize_data(X, course_torchtext, term_torchtext, grade_torchtext, max_len
 
 
 def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False, categories=False):
-    _, X_val, X_test, _, y_val, y_test = util.prep_dataset_v2(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=augment)
-    X_train, _, _, y_train, _, _ = util.prep_dataset_v2(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
+    _, X_val, X_test, _, y_val, y_test = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=augment)
+    X_train, _, _, y_train, _, _ = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
 
 
     X_train_lens = get_X_lens_v2(X_train, TRAIN_LENGTH)
@@ -290,16 +290,5 @@ if __name__ == '__main__':
     main()
 
 """
-TODO:
-- masking
-- normal results
-- augmented results
-- subtokenization results
-
-Running trial with {'num_layers': 1, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.2, 'dim_feedforward': 1024, 'lr': 0.0005}
-Achieved metric of 0.0947345292136418.
-New best metric of 0.0947345292136418 to beat old metric of 0.08644299260486957 found.
-
-
  {'num_layers': 1, 'num_heads': 4, 'vec_size': 64, 'dropout': 0.3, 'dim_feedforward': 2048, 'lr': 0.0005}
 """

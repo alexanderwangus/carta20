@@ -14,8 +14,13 @@ STUD_FILE = DATA_DIR + 'studlists/major-CS-BS.txt'
 STRM_FILE = DATA_DIR + 'ID_strms.csv'
 COURSE_MAJOR_FILE = DATA_DIR + 'initial_dataset.fthr'
 RAW_DATA_FILE = DATA_DIR + 'course_outcomes.tsv'
+
 COURSE_OUTCOME_LIST_FILE = DATA_DIR + 'course_outcome_lists.pkl'
 COURSE_OUTCOME_LIST_FILE_AUGMENTED = DATA_DIR + 'course_outcome_lists_augmented_2.pkl'
+COURSE_OUTCOME_LIST_TRAIN_FILE = DATA_DIR + 'course_outcome_lists_train.pkl'
+COURSE_OUTCOME_LIST_VAL_FILE = DATA_DIR + 'course_outcome_lists_val.pkl'
+COURSE_OUTCOME_LIST_TEST_FILE = DATA_DIR + 'course_outcome_lists_test.pkl'
+
 DEGREE_CATEGORY_FILE = DATA_DIR + 'degree_to_degree_category.csv'
 
 
@@ -231,6 +236,39 @@ def train_test_split(X, y, df):
     return (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices)
 
 
+def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False):
+    df_train = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
+    df_val = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
+    df_test = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
+
+
+    y_train = df_train['ACAD_PLAN_1']
+    y_val = df_val['ACAD_PLAN_1']
+    y_test = df_test['ACAD_PLAN_1']
+
+    X_train = df_train.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
+    X_val = df_val.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
+    X_test = df_test.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
+
+
+    if num_classes_train > 0:
+        X_train['course_history'] = X_train['course_history'].apply(truncate_class_v2, args=[num_classes_train])
+        X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_train])
+        X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_train])
+
+    if num_classes_predict > 0:
+        X_val['course_history'] = X_val['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
+
+        X_test['course_history'] = X_test['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
+
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+
 def prep_dataset_v2(num_classes_train=-1, num_classes_predict=-1, augmented=False):
     if augmented:
         df = pd.read_pickle(COURSE_OUTCOME_LIST_FILE_AUGMENTED)
@@ -245,21 +283,19 @@ def prep_dataset_v2(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
 
     (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices) = train_test_split(X, y, df)
 
-    if num_classes_predict > 0 or num_classes_train > 0:
-        df['course_history'] = df['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
-        df['RELATIVE_TERM'] = df['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
-        df['CRSE_GRADE_INPUT'] = df['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
-        X_truncated = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
+    if num_classes_train > 0:
+        X_train['course_history'] = X_train['course_history'].apply(truncate_class_v2, args=[num_classes_train])
+        X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_train])
+        X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_train])
 
-        if num_classes_train > 0:
-            X_train = X_truncated.loc[train_indices]
-            # y_train = y_train[train_indices]
+    if num_classes_predict > 0:
+        X_val['course_history'] = X_val['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
 
-        if num_classes_predict > 0:
-            X_val = X_truncated.loc[val_indices]
-            X_test = X_truncated.loc[test_indices]
-            # y_val = y_val[val_indices]
-            # y_test = y_test[test_indices]
+        X_test['course_history'] = X_test['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
