@@ -5,6 +5,7 @@ from req_builder import Req, Subreq
 from sklearn.feature_extraction.text import CountVectorizer
 import datetime
 import re
+import torch
 
 DATA_DIR = os.getcwd() + '/data/'
 MATRIX_FILE = DATA_DIR + 'crs-qtr.vec'
