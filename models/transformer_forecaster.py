@@ -14,8 +14,8 @@ import itertools
 import copy
 
 
-TRAIN_LENGTH = 5
-PREDICT_LENGTH = 5
+TRAIN_LENGTH = 10
+PREDICT_LENGTH = 10
 
 
 class TransformerForecaster(nn.Module):
@@ -217,18 +217,18 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
 
 def hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, augment=False, categories=False):
     print(f"\nRunning hyperparam search with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
-    print(f"subtokenize = {subtokenize}, augmentation = {augment}")
+    print(f"subtokenize = {subtokenize}, augmentation = {augment}, degree categories = {categories}")
 
-    data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment)
+    data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment, categories=categories)
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     batch_size = 32
-    epochs = 5
+    epochs = 30
 
     batch_sizes = [32]
-    num_layers = [6]
-    num_heads = [4]
-    vec_size = [128]
+    num_layers = [1, 2, 4]
+    num_heads = [1, 2, 4]
+    vec_size = [64, 128, 256]
     dropout=[0.2]
     dim_feedforward=[2048, 4128]
     lrs = [0.00001, 0.00005]
@@ -252,7 +252,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         transformer_model = train_transformer(epochs, data, vs, bs, nl, nh, lr,\
             num_tokens, dp, d_ff, verbose=False, categories=categories)
 
-        metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True)['macro avg']['f1-score']
+        metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True, categories=categories)['macro avg']['f1-score']
         print(f"Achieved metric of {metric}.")
 
         if metric > best_metric:
@@ -288,7 +288,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(subtokenize=True, augment=False, categories=False,\
+    hyperparam_search(subtokenize=True, augment=False, categories=True,\
     pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
