@@ -366,6 +366,23 @@ def subtokenize_single_course_v2(course_str):
 
     return items
 
+
+"""
+y is list of true labels
+y_pred is list of lists of top_n predictions
+returns: a list y_top_n, a conversion of y_pred where if y_pred contains a correct
+         prediction, chooses said prediction. Else chooses arbitrary wrong prediction.
+"""
+def top_n_conversion(y, y_pred):
+    y_top_n = []
+    for i in range(len(y)):
+        if y[i] in y_pred[i]:
+            y_top_n.append(y[i])
+        else:
+            y_top_n.append(y_pred[i][0])
+    return y_top_n
+
+
 """
 takes in list of majors and outputs list of degree categories
 """

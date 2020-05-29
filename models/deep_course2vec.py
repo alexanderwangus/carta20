@@ -101,7 +101,7 @@ def get_X_lens_v2(X, max_length):
     return [get_seq_len(seq, max_length) for _, seq in X["course_history"].items()]
 
 
-def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr, verbose=True, categories=False):
+def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, epochs, batch_size, lr, verbose=True, categories=False, top_n=1):
     if torch.cuda.is_available():
         model = model.cuda()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -111,7 +111,7 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories)
+    val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories, top_n=top_n)
     if verbose:
         print(f"== Pre-training val results (macro avg) ==")
         print(f"  Precision: {val_results['macro avg']['precision']}")
@@ -147,13 +147,13 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
             optimizer.step()
 
         if verbose:
-            train_results = evaluate_model(X_train, X_train_lens, y_train, model, categories=categories)
+            train_results = evaluate_model(X_train, X_train_lens, y_train, model, categories=categories, top_n=top_n)
             print(f"== Epoch {epoch+1} train results (macro avg) ==")
             print(f"  Precision: {train_results['macro avg']['precision']}")
             print(f"  Recall: {train_results['macro avg']['recall']}")
             print(f"  f1-score: {train_results['macro avg']['f1-score']}")
 
-        val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories)
+        val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories, top_n=top_n)
         if verbose:
             print(f"== Epoch {epoch+1} val results (macro avg) ==")
             print(f"  Precision: {val_results['macro avg']['precision']}")
@@ -168,7 +168,8 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
 
     return best_model
 
-def evaluate_model(X, X_lens, y, model, ouput_dict=True, categories=False):
+
+def evaluate_model(X, X_lens, y, model, output_dict=True, categories=False, top_n=1):
     model.eval()
     batch_size = 32
 
@@ -188,5 +189,10 @@ def evaluate_model(X, X_lens, y, model, ouput_dict=True, categories=False):
             if torch.cuda.is_available():
                 sentences = sentences.cuda()
                 sentence_lens = sentence_lens.cuda()
-            y_pred += model.predict(sentences, sentence_lens)
-        return classification_report(y, y_pred, zero_division=0, output_dict=ouput_dict)
+            y_pred += model.predict(sentences, sentence_lens, top_n=top_n)
+
+        if top_n != 1:
+            y_pred = util.top_n_conversion(y, y_pred)
+
+
+        return classification_report(y, y_pred, zero_division=0, output_dict=output_dict)

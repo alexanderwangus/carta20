@@ -90,12 +90,18 @@ class TransformerForecaster(nn.Module):
         return output
 
 
-    def predict(self, sentence, X_lens):
+    def predict(self, sentence, X_lens, top_n=1):
         out = self.forward(sentence, X_lens)
-        predicted = torch.argmax(out, 1)
-        if torch.cuda.is_available():
-            predicted = [t.item() for t in predicted]
-        return predicted
+        softmax = nn.Softmax(dim=1)
+        out = softmax(out)
+        if top_n == 1:
+            predicted = torch.argmax(out, 1)
+            if torch.cuda.is_available():
+                predicted = [t.item() for t in predicted]
+            return predicted
+        else:
+            top_n_vals, top_n_indices = torch.topk(out, top_n, dim=1)
+            return top_n_indices
 
 
 def dummy_tokenizer(l):
@@ -176,14 +182,14 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
     return (X_train, X_train_lens, y_train, X_val, X_val_lens, y_val), (n_course_tokens, n_term_tokens, n_grade_tokens)
 
 
-def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False, categories=False):
+def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False, categories=False, top_n=1):
     print(f"\nRunning transformer with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
     print(f"subtokenize = {subtokenize}, augmentation = {augment}, degree categories = {categories}")
 
     data, num_tokens = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment, categories=categories)
 
     batch_size = 32
-    epochs = 30
+    epochs = 1
 
     num_layers = 1
     num_heads = 4
@@ -204,18 +210,18 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
             transformer_model = transformer_model.cuda()
     else:
         transformer_model = train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr,\
-            num_tokens, dropout, dim_feedforward, categories=categories)
+            num_tokens, dropout, dim_feedforward, categories=categories, top_n=top_n)
 
         print(f"Saving transformer to '{transformer_model_path}'")
         with open(transformer_model_path, 'wb') as f:
             torch.save(transformer_model.state_dict(), f)
 
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
-    val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=False, categories=categories)
+    val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, output_dict=False, categories=categories, top_n=top_n)
     print(val_results)
 
 
-def hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, augment=False, categories=False):
+def hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, augment=False, categories=False, top_n=1):
     print(f"\nRunning hyperparam search with num_classes_train={num_classes_train}, num_classes_predict={num_classes_predict}")
     print(f"subtokenize = {subtokenize}, augmentation = {augment}, degree categories = {categories}")
 
@@ -269,7 +275,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         torch.save(best_model.state_dict(), f)
 
 
-def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True, categories=False):
+def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True, categories=False, top_n=1):
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
 
     transformer_model = TransformerForecaster(vec_size, num_tokens, \
@@ -278,7 +284,7 @@ def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads,
     if verbose:
         print(f"Training transformer")
     transformer_model = train_model(transformer_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
-        epochs, batch_size, lr, verbose=verbose, categories=categories)
+        epochs, batch_size, lr, verbose=verbose, categories=categories, top_n=top_n)
 
     return transformer_model
 
@@ -288,7 +294,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    hyperparam_search(subtokenize=True, augment=False, categories=True,\
+    run_transformer_forecaster(top_n=3, subtokenize=False, augment=False, categories=False,\
     pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
