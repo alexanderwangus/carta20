@@ -378,7 +378,7 @@ def top_n_conversion(y, y_pred):
     y_top_n = []
     if torch.cuda.is_available():
         y = [t.item() for t in y]
-    print(y[;5])
+    print(y[:5])
     print(y_pred[:5])
     for i in range(len(y)):
         if y[i] in y_pred[i]:
