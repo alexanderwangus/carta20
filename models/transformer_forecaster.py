@@ -101,6 +101,8 @@ class TransformerForecaster(nn.Module):
             return predicted
         else:
             top_n_vals, top_n_indices = torch.topk(out, top_n, dim=1)
+            if torch.cuda.is_available():
+                top_n_indices = [t.item() for t in top_n_indices]
             return top_n_indices
 
 
