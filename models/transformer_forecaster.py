@@ -145,6 +145,7 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
     X_train_lens = get_X_lens_v2(X_train, TRAIN_LENGTH)
     X_val_lens = get_X_lens_v2(X_val, PREDICT_LENGTH)
 
+
     if subtokenize:
         X_train = subtokenize_features(X_train)
         X_val = subtokenize_features(X_val)
@@ -287,7 +288,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(subtokenize=False, augment=False, categories=False,\
+    run_transformer_forecaster(subtokenize=True, augment=False, categories=False,\
     pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 

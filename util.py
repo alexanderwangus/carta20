@@ -236,6 +236,13 @@ def train_test_split(X, y, df):
     return (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices)
 
 
+def word_tokenize(s):
+    tokens = s.split(' ')
+    if tokens[-1] == '':
+        tokens = tokens[:-1]
+    return tokens
+
+
 def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False):
     df_train = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
     df_val = pd.read_pickle(COURSE_OUTCOME_LIST_VAL_FILE)
@@ -249,17 +256,17 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
     X_val = df_val.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
     X_test = df_test.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
 
-    X_train['course_history'] = X_train['course_history'].apply(lambda x: x.split(' '))
-    X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(lambda x: x.split(' '))
-    X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(lambda x: x.split(' '))
+    X_train['course_history'] = X_train['course_history'].apply(word_tokenize)
+    X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(word_tokenize)
+    X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(word_tokenize)
 
-    X_val['course_history'] = X_val['course_history'].apply(lambda x: x.split(' '))
-    X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(lambda x: x.split(' '))
-    X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(lambda x: x.split(' '))
+    X_val['course_history'] = X_val['course_history'].apply(word_tokenize)
+    X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(word_tokenize)
+    X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(word_tokenize)
 
-    X_test['course_history'] = X_test['course_history'].apply(lambda x: x.split(' '))
-    X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(lambda x: x.split(' '))
-    X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(lambda x: x.split(' '))
+    X_test['course_history'] = X_test['course_history'].apply(word_tokenize)
+    X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(word_tokenize)
+    X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(word_tokenize)
 
 
     if num_classes_train > 0:
@@ -341,7 +348,6 @@ def prep_dataset(num_classes_predict=-1, vectorize=False):
 # returns list of subtokens
 def subtokenize_single_course(course_str):
     match = re.match(r"([^0-9]+)([0-9]+)([^0-9]*)", course_str, re.I)
-    # print(course_str)
     items = list(match.groups())
     if items[-1] == "":
         items = items[:-1]
