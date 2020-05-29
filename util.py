@@ -377,15 +377,12 @@ returns: a list y_top_n, a conversion of y_pred where if y_pred contains a corre
 def top_n_conversion(y, y_pred):
     y_top_n = []
     if torch.cuda.is_available():
-        y = y.cuda()
-        y_pred = y_pred.cuda()
+        y = [t.item() for t in y]
     for i in range(len(y)):
         if y[i] in y_pred[i]:
             y_top_n.append(y[i])
         else:
             y_top_n.append(y_pred[i][0])
-    if torch.cuda.is_available():
-        y_top_n = y_top_n.cuda()
     return y_top_n
 
 
