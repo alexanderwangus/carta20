@@ -380,6 +380,8 @@ def top_n_conversion(y, y_pred):
             y_top_n.append(y[i])
         else:
             y_top_n.append(y_pred[i][0])
+    if torch.cuda.is_available():
+        y_top_n = y_top_n.cuda()
     return y_top_n
 
 
