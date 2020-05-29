@@ -380,7 +380,7 @@ def top_n_conversion(y, y_pred):
     print(y_pred[:5])
     for i in range(len(y)):
         if y[i] in y_pred[i]:
-            y_top_n.append(y[i])
+            y_top_n.append(y[i].item())
         else:
             y_top_n.append(y_pred[i][0])
     print(y_top_n[:5])
