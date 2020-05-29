@@ -376,14 +376,11 @@ returns: a list y_top_n, a conversion of y_pred where if y_pred contains a corre
 """
 def top_n_conversion(y, y_pred):
     y_top_n = []
-    print(y[:5])
-    print(y_pred[:5])
     for i in range(len(y)):
         if y[i] in y_pred[i]:
             y_top_n.append(y[i].item())
         else:
             y_top_n.append(y_pred[i][0])
-    print(y_top_n[:5])
     return y_top_n
 
 
