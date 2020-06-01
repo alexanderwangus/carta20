@@ -68,7 +68,7 @@ class LSTMForecaster(nn.Module):
 
 
 
-def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, num_classes_train=-1, num_classes_predict=-1):
+def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False):
     print(f"\nRunning lstm with vec_size={vec_size}, win_size={win_size}, min_count={min_count}, epochs={epochs}, num_classes_predict={num_classes_predict}")
 
     # set up hyperparams, load model
@@ -86,9 +86,9 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
     X_train, _, _, y_train, _, _ = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
 
     X_train_lens = get_X_lens_v2(X_train, vec_size)
-    X_train = featurize_student_v2(X_train, course2vec_params, num_classes_train, subtokenize=False)
+    X_train = featurize_student_v2(X_train, course2vec_params, num_classes_train, subtokenize=subtokenize)
     X_val_lens = get_X_lens_v2(X_val, vec_size)
-    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=False)
+    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=subtokenize)
     y_train = y_train.values
     y_val = y_val.values
 
@@ -125,7 +125,8 @@ def main():
     win_size=10
     min_count=1
     epochs=30
-    lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
+    lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
+    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True)
 
 if __name__ == '__main__':
     main()
