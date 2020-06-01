@@ -56,7 +56,7 @@ def featurize_student(X, course2vec_model, vec_size, max_length):
     return np.stack(X.values)
 
 
-def featurize_student_v2(X, course2vec_params, max_length, training_sets=None):
+def featurize_student_v2(X, course2vec_params, max_length, training_sets=None, subtokenize=False):
     vec_size = course2vec_params["vec_size"]
     win_size = course2vec_params["win_size"]
     min_count = course2vec_params["min_count"]
@@ -64,6 +64,14 @@ def featurize_student_v2(X, course2vec_params, max_length, training_sets=None):
     course_history_course2vec_model = Word2Vec.load(get_course2vec_model_path(vec_size, win_size, min_count, feature_type="course_history", subtokenized=subtokenize))
     term_course2vec_model = Word2Vec.load(get_course2vec_model_path(vec_size, win_size, min_count, feature_type="RELATIVE_TERM"))
     grade_course2vec_model = Word2Vec.load(get_course2vec_model_path(vec_size, win_size, min_count, feature_type="CRSE_GRADE_INPUT"))
+
+    if subtokenize:
+        X = subtokenize_features(X)
+        max_length = max_length * 4
+    #
+    # print(X["course_history"])
+    # print(X["RELATIVE_TERM"])
+    # print(X["CRSE_GRADE_INPUT"])
 
     X_course_history = X["course_history"].apply(courses2vecs, args=[course_history_course2vec_model, vec_size, max_length])
     X_term = X["RELATIVE_TERM"].apply(courses2vecs, args=[term_course2vec_model, vec_size, max_length])
