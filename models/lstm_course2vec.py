@@ -125,7 +125,7 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=50
+    epochs=30
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
     num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True)
 

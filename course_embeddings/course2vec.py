@@ -72,8 +72,7 @@ def get_course_vec(model, word, vec_size):
     return model.wv[word] if word in model.wv else np.zeros(vec_size)
 
 
-def courses2vec(course_str, model, vec_size):
-    course_list = course_str.split(',')
+def courses2vec(course_list, model, vec_size):
     vec = np.mean([get_course_vec(model, word, vec_size) for word in course_list], axis=0)
     return np.array(vec)
 

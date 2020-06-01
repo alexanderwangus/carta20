@@ -9,8 +9,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 import pickle
 
-TRAIN_LENGTH = 5
-PREDICT_LENGTH = 5
+TRAIN_LENGTH = 30
+PREDICT_LENGTH = 30
 
 def train_log_reg(X, y):
     reg = LogisticRegression().fit(X, y)
@@ -45,7 +45,7 @@ def multiclass_forecast():
 Trains on full course histories, but predicts on truncated course histories.
 '''
 def multiclass_forecast_full(num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, model=None):
-    X_train, X_val, X_test, y_train, y_val, y_test = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict)
+    X_train, X_val, X_test, y_train, y_val, y_test = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, vectorize=True)
     if not model:
         train_score, reg = train_log_reg(X_train, y_train)
         print(train_score)
@@ -63,7 +63,7 @@ def multiclass_forecast_full(num_classes_train=TRAIN_LENGTH, num_classes_predict
 
 def main():
     # multiclass_forecast_full(model="log_reg_full_train.pickle")
-    multiclass_forecast_full(model=None)
+    multiclass_forecast_full()
 
 
 if __name__ == '__main__':

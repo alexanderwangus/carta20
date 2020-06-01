@@ -175,13 +175,14 @@ def get_tracks_deviation(stud_row, tracknames, tracks, rev_vocab):
 
 
 '''
-Vectorize student course histories.
+Vectorize student course histories (each element is lists of strs).
 Takes in a pandas series of course series and returns a matrix, where
 each row is the given student's vectorized course history.
 
 Returns count vectorizer and said matrix.
 '''
 def vectorize_course_history(srs, vectorizer=None):
+    srs = srs.apply(lambda x: ' '.join(x))
     course_strings = srs.values.tolist()
     if not vectorizer:
         vectorizer = CountVectorizer()
@@ -244,7 +245,7 @@ def word_tokenize(s):
     return tokens
 
 
-def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False):
+def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False, vectorize=False):
     df_train = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
     df_val = pd.read_pickle(COURSE_OUTCOME_LIST_VAL_FILE)
     df_test = pd.read_pickle(COURSE_OUTCOME_LIST_TEST_FILE)
@@ -283,6 +284,11 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
         X_test['course_history'] = X_test['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
         X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
         X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
+
+    if vectorize:
+        vectorizer, X_train = vectorize_course_history(X_train.loc[:, 'course_history'])
+        _, X_val = vectorize_course_history(X_val.loc[:, 'course_history'], vectorizer=vectorizer)
+        _, X_test = vectorize_course_history(X_test.loc[:, 'course_history'], vectorizer=vectorizer)
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
