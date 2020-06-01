@@ -94,8 +94,8 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
         lstm_model.load_state_dict(torch.load(lstm_model_path))
     else:
         print(f"Training lstm")
-        lstm_model = train_model(lstm_model, course2vec_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
-            epochs=epochs, batch_size=batch_size, lr=lr)
+        lstm_model = train_model(lstm_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
+            epochs, batch_size, lr)
 
         print(f"Saving lstm to '{lstm_model_path}'")
         with open(lstm_model_path, 'wb') as f:
