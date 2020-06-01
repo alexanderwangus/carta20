@@ -117,7 +117,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
 
 
 def get_lstm_model_path(input_size, batch_size, num_layers, hidden_size, lr, dropout):
-    return f"lstm_saved_models/augmented_2/dim{input_size}_batch{batch_size}_layers{num_layers}_hidden{hidden_size}_lr{lr}_seq_len{TRAIN_LENGTH}_drop{dropout}.model"
+    return f"lstm_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_hidden{hidden_size}_lr{lr}_seq_len{TRAIN_LENGTH}_drop{dropout}.model"
 
 
 def main():
