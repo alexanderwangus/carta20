@@ -56,7 +56,7 @@ def featurize_student(X, course2vec_model, vec_size, max_length):
     return np.stack(X.values)
 
 
-def featurize_student_v2(X, course2vec_params, max_length, training_sets=None, subtokenize=False):
+def featurize_student_v2(X, course2vec_params, training_sets=None, subtokenize=False):
     vec_size = course2vec_params["vec_size"]
     win_size = course2vec_params["win_size"]
     min_count = course2vec_params["min_count"]
