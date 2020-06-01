@@ -50,10 +50,21 @@ class LSTMForecaster(nn.Module):
 
         return output
 
-    def predict(self, sentence, X_lens):
+
+    def predict(self, sentence, X_lens, top_n=1):
         out = self.forward(sentence, X_lens)
-        predicted = torch.argmax(out, 1)
-        return predicted
+        softmax = nn.Softmax(dim=1)
+        out = softmax(out)
+        if top_n == 1:
+            predicted = torch.argmax(out, 1)
+            if torch.cuda.is_available():
+                predicted = [t.item() for t in predicted]
+            return predicted
+        else:
+            top_n_vals, top_n_indices = torch.topk(out, top_n, dim=1)
+            if torch.cuda.is_available():
+                top_n_indices = [t.tolist() for t in top_n_indices]
+            return top_n_indices
 
 
 
