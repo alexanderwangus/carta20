@@ -30,9 +30,9 @@ class TransformerForecaster(nn.Module):
         encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=dim_feedforward, dropout=dropout)
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
-        self.decoder = nn.Linear(3 * 3 * embed_size, num_classes)
+        # self.decoder = nn.Linear(3 * 3 * embed_size, num_classes)
         self.lstm_hidden_size = 512
-        # self.decoder = nn.LSTM(3 * embed_size, self.lstm_hidden_size, 1)
+        self.decoder = nn.LSTM(3 * embed_size, self.lstm_hidden_size, 1)
 
         # self.relu = nn.ReLU()
         self.linear_1 = nn.Linear(self.lstm_hidden_size, num_classes)
