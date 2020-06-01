@@ -69,7 +69,7 @@ class LSTMForecaster(nn.Module):
 
 
 
-def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False):
+def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top_n=1, pretrained_lstm=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False):
     print(f"\nRunning lstm with vec_size={vec_size}, win_size={win_size}, min_count={min_count}, epochs={epochs}, num_classes_predict={num_classes_predict}")
 
     # set up hyperparams, load model
@@ -107,7 +107,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
     else:
         print(f"Training lstm")
         lstm_model = train_model(lstm_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
-            epochs, batch_size, lr)
+            epochs, batch_size, lr, top_n=top_n)
 
         print(f"Saving lstm to '{lstm_model_path}'")
         with open(lstm_model_path, 'wb') as f:
@@ -127,7 +127,7 @@ def main():
     min_count=1
     epochs=30
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
-    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True)
+    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True, categories=False, top_n=3)
 
 if __name__ == '__main__':
     main()
