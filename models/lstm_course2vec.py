@@ -40,6 +40,7 @@ class LSTMForecaster(nn.Module):
         # sentences of size (batch, max_seq_len, input_size)
 
         sentences = torch.nn.utils.rnn.pack_padded_sequence(sentences, X_lens, batch_first=True, enforce_sorted=False)
+        self.lstm_1.flatten_parameters()
         output, (h_n, c_n) = self.lstm_1(sentences)  # h_n: (num_layers * num_directions, batch, hidden_size)
         h_n = h_n[-1]
         # h_n_permuted = h_n.permute(1, 0, 2)  # (batch, num_layers * num_directions, hidden_size)
@@ -96,7 +97,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
     num_layers = 1
     hidden_size = 150
     dropout=0.2
-    lr = 0.001
+    lr = 0.0001
     lstm_model_path = get_lstm_model_path(vec_size, batch_size, num_layers, hidden_size, lr, dropout)
     lstm_model = LSTMForecaster(vec_size * NUM_FEATURES, util.NUM_CLASSES, num_layers=num_layers, hidden_size=hidden_size, dropout=dropout)
 
@@ -124,7 +125,7 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=30
+    epochs=50
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
     num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True)
 
