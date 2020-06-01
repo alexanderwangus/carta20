@@ -113,7 +113,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
         with open(lstm_model_path, 'wb') as f:
             torch.save(lstm_model.state_dict(), f)
 
-    val_results = evaluate_model(X_val, X_val_lens, y_val, lstm_model, output_dict=False)
+    val_results = evaluate_model(X_val, X_val_lens, y_val, lstm_model, output_dict=False, top_n=top_n)
     print(val_results)
 
 
