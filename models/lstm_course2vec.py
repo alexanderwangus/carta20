@@ -77,7 +77,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
     X_train_lens = get_X_lens_v2(X_train, vec_size)
     X_train = featurize_student_v2(X_train, course2vec_params, num_classes_train, subtokenize=False)
     X_val_lens = get_X_lens_v2(X_val, vec_size)
-    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_val, subtokenize=False)
+    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=False)
     y_train = y_train.values
     y_val = y_val.values
 
