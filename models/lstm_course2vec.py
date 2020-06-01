@@ -86,11 +86,18 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
     X_train, _, _, y_train, _, _ = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
 
     X_train_lens = get_X_lens_v2(X_train, vec_size)
-    X_train = featurize_student_v2(X_train, course2vec_params, num_classes_train, subtokenize=subtokenize)
+    X_train = featurize_student_v2(X_train, course2vec_params, num_classes_train)
     X_val_lens = get_X_lens_v2(X_val, vec_size)
-    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=subtokenize)
+    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict)
+    
     y_train = y_train.values
     y_val = y_val.values
+
+    if subtokenize:
+        X_train = subtokenize_features(X_train)
+        X_val = subtokenize_features(X_val)
+        X_train_lens = get_X_lens_v2(X_train, -1)
+        X_val_lens = get_X_lens_v2(X_val, -1)
 
     batch_size = 32
     num_layers = 1
