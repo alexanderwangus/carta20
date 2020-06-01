@@ -14,8 +14,8 @@ import itertools
 import copy
 
 
-TRAIN_LENGTH = 5
-PREDICT_LENGTH = 5
+TRAIN_LENGTH = 20
+PREDICT_LENGTH = 20
 
 
 class TransformerForecaster(nn.Module):
@@ -297,7 +297,7 @@ def get_transformer_model_path(input_size, batch_size, num_layers, num_heads, lr
 
 
 def main():
-    run_transformer_forecaster(top_n=1, subtokenize=True, augment=False, categories=False,\
+    run_transformer_forecaster(top_n=1, subtokenize=False, augment=False, categories=False,\
     pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH)
 
 
