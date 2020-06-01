@@ -14,8 +14,8 @@ import itertools
 import copy
 
 
-TRAIN_LENGTH = 20
-PREDICT_LENGTH = 20
+TRAIN_LENGTH = 5
+PREDICT_LENGTH = 5
 
 
 class TransformerForecaster(nn.Module):
@@ -34,9 +34,9 @@ class TransformerForecaster(nn.Module):
         # self.lstm_hidden_size = 512
         # self.decoder = nn.LSTM(3 * embed_size, self.lstm_hidden_size, 1)
 
-        self.relu = nn.ReLU()
-        self.linear_1 = nn.Linear(3 * 3 * embed_size, embed_size)
-        self.linear_2 = nn.Linear(embed_size, num_classes)
+        # self.relu = nn.ReLU()
+        self.linear_1 = nn.Linear(self.lstm_hidden_size, num_classes)
+        # self.linear_2 = nn.Linear(embed_size, num_classes)
 
         self.init_weights()
 
@@ -49,9 +49,6 @@ class TransformerForecaster(nn.Module):
 
         self.linear_1.bias.data.zero_()
         self.linear_1.weight.data.uniform_(-initrange, initrange)
-
-        self.linear_2.bias.data.zero_()
-        self.linear_2.weight.data.uniform_(-initrange, initrange)
 
         # self.decoder.bias.data.zero_()
         # self.decoder.weight.data.uniform_(-initrange, initrange)
@@ -84,12 +81,12 @@ class TransformerForecaster(nn.Module):
         output_max, _ = torch.max(output, dim=0)
         output_min, _ = torch.min(output, dim=0)
         output = torch.cat([torch.mean(output, dim=0), output_max, output_min], dim=1)
-        # self.decoder.flatten_parameters()
-        # output, (h_n, c_n) = self.decoder(output)
-        output = self.linear_1(output)
+        self.decoder.flatten_parameters()
+        output, (h_n, c_n) = self.decoder(output)
+        # output = self.decoder(output)
 
-        # output = self.linear_1(h_n[-1])
-        output = self.linear_2(self.relu(output))
+        output = self.linear_1(h_n[-1])
+        # output = self.linear_2(self.relu(output))
 
         return output
 

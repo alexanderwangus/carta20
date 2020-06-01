@@ -97,7 +97,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False
     num_layers = 1
     hidden_size = 150
     dropout=0.2
-    lr = 0.0001
+    lr = 0.005
     lstm_model_path = get_lstm_model_path(vec_size, batch_size, num_layers, hidden_size, lr, dropout)
     lstm_model = LSTMForecaster(vec_size * NUM_FEATURES, util.NUM_CLASSES, num_layers=num_layers, hidden_size=hidden_size, dropout=dropout)
 
