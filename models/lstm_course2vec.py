@@ -92,6 +92,9 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=subtokenize)
     y_train = y_train.values
     y_val = y_val.values
+    if categories:
+        y_train = util.degrees_to_categories(y_train)
+        y_val = util.degrees_to_categories(y_val)
 
     batch_size = 32
     num_layers = 1
@@ -107,13 +110,13 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     else:
         print(f"Training lstm")
         lstm_model = train_model(lstm_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
-            epochs, batch_size, lr, top_n=top_n)
+            epochs, batch_size, lr, top_n=top_n, categories=categories)
 
         print(f"Saving lstm to '{lstm_model_path}'")
         with open(lstm_model_path, 'wb') as f:
             torch.save(lstm_model.state_dict(), f)
 
-    val_results = evaluate_model(X_val, X_val_lens, y_val, lstm_model, output_dict=False, top_n=top_n)
+    val_results = evaluate_model(X_val, X_val_lens, y_val, lstm_model, output_dict=False, top_n=top_n, categories=categories)
     print(val_results)
 
 
@@ -127,7 +130,7 @@ def main():
     min_count=1
     epochs=30
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
-    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True, categories=False, top_n=3)
+    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True, categories=True, top_n=1)
 
 if __name__ == '__main__':
     main()
