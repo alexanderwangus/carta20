@@ -425,12 +425,12 @@ def get_bias_datasets(split="val"):
     if split == "val":
         gender_stem_df = pd.read_pickle(GENDER_STEM_STEREOTYPE_VAL_FILE)
         gender_stem_anti_df = pd.read_pickle(GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE)
-        gpa_stem_anti_df = pd.read_pickle(GPA_STEM_STEREOTYPE_VAL_FILE)
+        gpa_stem_df = pd.read_pickle(GPA_STEM_STEREOTYPE_VAL_FILE)
         gpa_stem_anti_df = pd.read_pickle(GPA_STEM_ANTI_STEREOTYPE_VAL_FILE)
     else:
         gender_stem_df = pd.read_pickle(GENDER_STEM_STEREOTYPE_TEST_FILE)
         gender_stem_anti_df = pd.read_pickle(GENDER_STEM_ANTI_STEREOTYPE_TEST_FILE)
-        gpa_stem_anti_df = pd.read_pickle(GPA_STEM_STEREOTYPE_TEST_FILE)
+        gpa_stem_df = pd.read_pickle(GPA_STEM_STEREOTYPE_TEST_FILE)
         gpa_stem_anti_df = pd.read_pickle(GPA_STEM_ANTI_STEREOTYPE_TEST_FILE)
 
     return gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df
