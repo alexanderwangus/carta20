@@ -222,6 +222,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
     val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, output_dict=False, categories=categories, top_n=top_n)
     print(val_results)
+    evaluate_model_bias(model, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
 
 def hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, augment=False, categories=False, top_n=1):

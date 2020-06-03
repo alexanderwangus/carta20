@@ -8,6 +8,7 @@ import re
 import torch
 
 DATA_DIR = os.getcwd() + '/data/'
+BIAS_DIR = os.getcwd() + '/data/bias_testing/'
 MATRIX_FILE = DATA_DIR + 'crs-qtr.vec'
 VOCAB_FILE = DATA_DIR + 'vocab_crs.txt'
 COURSE_FILE = DATA_DIR + 'courselists/dept-CS.txt'
@@ -24,15 +25,15 @@ COURSE_OUTCOME_LIST_TEST_FILE = DATA_DIR + 'course_outcome_lists_test.pkl'
 
 DEGREE_CATEGORY_FILE = DATA_DIR + 'degree_to_degree_category.csv'
 
-GENDER_STEM_STEREOTYPE_VAL_FILE = DATA_DIR + 'gender_stem_stereotype_val.pkl'
-GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE = DATA_DIR + 'gender_stem_anti_stereotype_val.pkl'
-GENDER_STEM_STEREOTYPE_TEST_FILE = DATA_DIR + 'gender_stem_stereotype_test.pkl'
-GENDER_STEM_ANTI_STEREOTYPE_TEST_FILE = DATA_DIR + 'gender_stem_anti_stereotype_test.pkl'
+GENDER_STEM_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gender_stem_stereotype_val.pkl'
+GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gender_stem_anti_stereotype_val.pkl'
+GENDER_STEM_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gender_stem_stereotype_test.pkl'
+GENDER_STEM_ANTI_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gender_stem_anti_stereotype_test.pkl'
 
-GPA_STEM_STEREOTYPE_VAL_FILE = DATA_DIR + 'gpa_stem_stereotype_val.pkl'
-GPA_STEM_ANTI_STEREOTYPE_VAL_FILE = DATA_DIR + 'gpa_stem_anti_stereotype_val.pkl'
-GPA_STEM_STEREOTYPE_TEST_FILE = DATA_DIR + 'gpa_stem_stereotype_test.pkl'
-GPA_STEM_ANTI_STEREOTYPE_TEST_FILE = DATA_DIR + 'gpa_stem_anti_stereotype_test.pkl'
+GPA_STEM_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gpa_stem_stereotype_val.pkl'
+GPA_STEM_ANTI_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gpa_stem_anti_stereotype_val.pkl'
+GPA_STEM_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gpa_stem_stereotype_test.pkl'
+GPA_STEM_ANTI_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gpa_stem_anti_stereotype_test.pkl'
 
 
 MAJOR_LIST = ['BIOE', 'FILM', 'POLSC', 'CEE', 'HUMBI', 'CS', 'MATH', 'LAMER', 'EASST', 'ANSCI', 'AMSTU', 'MODLAN', 'PHYS', 'COMMU', 'ENVSE', 'INTLR', 'HUMAN', 'ASAM', 'DRAMA', 'CLASS', 'VTSS', 'IDMJR', 'PORT', 'ARTHS', 'SOCIS', 'ECON', 'IE', 'GS', 'GEOPH', 'ENVEN', 'IDMHS', 'HSTRY', 'FRENC', 'HUMRTS', 'MATCS', 'CE', 'ERE', 'GLBLST', 'POLSS', 'ENGR', 'ENGLI', 'COMMUS', 'CRWRIT', 'CHEM', 'LING', 'CHICA', 'INSST', 'PUBPO', 'PSYCH', 'FEMST', 'ARCHA', 'AFRAM', 'ETHSO', 'SOCIO', 'AA', 'NATAM', 'MATSC', 'ITAL', 'PHREL', 'PHILO', 'SPAN', 'ENGLF', 'STS', 'URBST', 'EASYS', 'CASA', 'AFRST', 'ANTHS', 'ENGLG', 'JAPAN', 'ENGL', 'MGTSC', 'BIOL', 'PETEN', 'CHILT', 'ANTHR', 'MELLC', 'ART', 'ME', 'CHINE', 'EE', 'FRENI', 'EDUC', 'ARTP', 'RELST', 'BIO', 'ILAC', 'ED', 'MUSIC', 'GERST', 'CSRE', 'FGSS', 'CPLIT', 'CHEME', 'HUMLG', 'SLAV', 'THPST', 'IDSH', 'SYMBO', 'ESTP', 'IDMEN', 'GES', 'AMELLC', 'ENGLS']
