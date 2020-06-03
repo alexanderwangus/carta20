@@ -186,12 +186,17 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
 
 
 def evaluate_model_bias(model, torch_texts, num_classes_predict=0, categories=False, top_n=1):
-    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df = util.get_bias_datasets()
+    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gp_df = util.get_bias_datasets()
 
     gender_stem_report = evaluate_model_bias_single_df(model, torch_texts, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
     gender_stem_anti_report = evaluate_model_bias_single_df(model, torch_texts, gender_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
     gpa_stem_report = evaluate_model_bias_single_df(model, torch_texts, gpa_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
     gpa_stem_anti_report = evaluate_model_bias_single_df(model, torch_texts, gpa_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+
+    male_report = evaluate_model_bias_single_df(model, torch_texts, male_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    female_report = evaluate_model_bias_single_df(model, torch_texts, female_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    high_gpa_report = evaluate_model_bias_single_df(model, torch_texts, high_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    low_gpa_report = evaluate_model_bias_single_df(model, torch_texts, low_gp_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
     # print(evaluate_model_bias_single_df(model, torch_texts, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False))
 
@@ -199,6 +204,11 @@ def evaluate_model_bias(model, torch_texts, num_classes_predict=0, categories=Fa
     print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
+
+    print(f"Macro f1-score for male dataset: {male_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for female dataset: {female_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for high GPA dataset: {high_gpa_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
 
 
 def evaluate_model_bias_single_df(model, torch_texts, df, num_classes_predict=0, categories=False, top_n=1, output_dict=True):

@@ -29,11 +29,19 @@ GENDER_STEM_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gender_stem_stereotype_val.pkl'
 GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gender_stem_anti_stereotype_val.pkl'
 GENDER_STEM_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gender_stem_stereotype_test.pkl'
 GENDER_STEM_ANTI_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gender_stem_anti_stereotype_test.pkl'
+MALE_VAL_FILE = BIAS_DIR + 'male_val.pkl'
+FEMALE_VAL_FILE = BIAS_DIR + 'female_val.pkl'
+HIGH_GPA_VAL_FILE = BIAS_DIR + 'high_gpa_val.pkl'
+LOW_GPA_VAL_FILE = BIAS_DIR + 'low_gpa_val.pkl'
 
 GPA_STEM_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gpa_stem_stereotype_val.pkl'
 GPA_STEM_ANTI_STEREOTYPE_VAL_FILE = BIAS_DIR + 'gpa_stem_anti_stereotype_val.pkl'
 GPA_STEM_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gpa_stem_stereotype_test.pkl'
 GPA_STEM_ANTI_STEREOTYPE_TEST_FILE = BIAS_DIR + 'gpa_stem_anti_stereotype_test.pkl'
+MALE_TEST_FILE = BIAS_DIR + 'male_test.pkl'
+FEMALE_TEST_FILE = BIAS_DIR + 'female_test.pkl'
+HIGH_GPA_TEST_FILE = BIAS_DIR + 'high_gpa_test.pkl'
+LOW_GPA_TEST_FILE = BIAS_DIR + 'low_gpa_test.pkl'
 
 
 MAJOR_LIST = ['BIOE', 'FILM', 'POLSC', 'CEE', 'HUMBI', 'CS', 'MATH', 'LAMER', 'EASST', 'ANSCI', 'AMSTU', 'MODLAN', 'PHYS', 'COMMU', 'ENVSE', 'INTLR', 'HUMAN', 'ASAM', 'DRAMA', 'CLASS', 'VTSS', 'IDMJR', 'PORT', 'ARTHS', 'SOCIS', 'ECON', 'IE', 'GS', 'GEOPH', 'ENVEN', 'IDMHS', 'HSTRY', 'FRENC', 'HUMRTS', 'MATCS', 'CE', 'ERE', 'GLBLST', 'POLSS', 'ENGR', 'ENGLI', 'COMMUS', 'CRWRIT', 'CHEM', 'LING', 'CHICA', 'INSST', 'PUBPO', 'PSYCH', 'FEMST', 'ARCHA', 'AFRAM', 'ETHSO', 'SOCIO', 'AA', 'NATAM', 'MATSC', 'ITAL', 'PHREL', 'PHILO', 'SPAN', 'ENGLF', 'STS', 'URBST', 'EASYS', 'CASA', 'AFRST', 'ANTHS', 'ENGLG', 'JAPAN', 'ENGL', 'MGTSC', 'BIOL', 'PETEN', 'CHILT', 'ANTHR', 'MELLC', 'ART', 'ME', 'CHINE', 'EE', 'FRENI', 'EDUC', 'ARTP', 'RELST', 'BIO', 'ILAC', 'ED', 'MUSIC', 'GERST', 'CSRE', 'FGSS', 'CPLIT', 'CHEME', 'HUMLG', 'SLAV', 'THPST', 'IDSH', 'SYMBO', 'ESTP', 'IDMEN', 'GES', 'AMELLC', 'ENGLS']
@@ -411,13 +419,23 @@ def get_bias_datasets(split="val"):
         gender_stem_anti_df = pd.read_pickle(GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE)
         gpa_stem_df = pd.read_pickle(GPA_STEM_STEREOTYPE_VAL_FILE)
         gpa_stem_anti_df = pd.read_pickle(GPA_STEM_ANTI_STEREOTYPE_VAL_FILE)
+
+        male_df = pd.read_pickle(MALE_VAL_FILE)
+        female_df = pd.read_pickle(FEMALE_VAL_FILE)
+        high_gpa_df = pd.read_pickle(HIGH_GPA_VAL_FILE)
+        low_gpa_df = pd.read_pickle(LOW_GPA_VAL_FILE)
     else:
         gender_stem_df = pd.read_pickle(GENDER_STEM_STEREOTYPE_TEST_FILE)
         gender_stem_anti_df = pd.read_pickle(GENDER_STEM_ANTI_STEREOTYPE_TEST_FILE)
         gpa_stem_df = pd.read_pickle(GPA_STEM_STEREOTYPE_TEST_FILE)
         gpa_stem_anti_df = pd.read_pickle(GPA_STEM_ANTI_STEREOTYPE_TEST_FILE)
 
-    return gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df
+        male_df = pd.read_pickle(MALE_TEST_FILE)
+        female_df = pd.read_pickle(FEMALE_TEST_FILE)
+        high_gpa_df = pd.read_pickle(HIGH_GPA_TEST_FILE)
+        low_gpa_df = pd.read_pickle(LOW_GPA_TEST_FILE)
+
+    return gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gpa_df
 
 
 def main():

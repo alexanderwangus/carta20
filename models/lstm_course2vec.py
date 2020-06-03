@@ -69,40 +69,41 @@ class LSTMForecaster(nn.Module):
 
 
 def evaluate_model_bias(model, course2vec_params, num_classes_predict=0, categories=False, top_n=1):
-    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df = util.get_bias_datasets()
+    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gpa_df = util.get_bias_datasets()
 
-    gender_stem_report = evaluate_model_bias_single_df(model, gender_stem_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gender_stem_anti_report = evaluate_model_bias_single_df(model, gender_stem_anti_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_report = evaluate_model_bias_single_df(model, gpa_stem_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_anti_report = evaluate_model_bias_single_df(model, gpa_stem_anti_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_report = evaluate_model_bias_single_df(model, course2vec_params, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_anti_report = evaluate_model_bias_single_df(model, course2vec_params, gender_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_report = evaluate_model_bias_single_df(model, course2vec_params, gpa_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_anti_report = evaluate_model_bias_single_df(model, course2vec_params, gpa_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+
+    male_report = evaluate_model_bias_single_df(model, course2vec_params, male_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    female_report = evaluate_model_bias_single_df(model, course2vec_params, female_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    high_gpa_report = evaluate_model_bias_single_df(model, course2vec_params, high_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    low_gpa_report = evaluate_model_bias_single_df(model, course2vec_params, low_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+
+    # print(evaluate_model_bias_single_df(model, torch_texts, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False))
 
     print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
 
-
-def evaluate_model_bias_single_df(model, df, course2vec_params, num_classes_predict=0, categories=False, top_n=1):
-    X_val = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
-    y_val = df['ACAD_PLAN_1']
-
-    X_val['course_history'] = X_val['course_history'].apply(word_tokenize)
-    X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(word_tokenize)
-    X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(word_tokenize)
-
-    if num_classes_predict > 0:
-        X_val['course_history'] = X_val['course_history'].apply(util.truncate_class_v2, args=[num_classes_predict])
-        X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(util.truncate_class_v2, args=[num_classes_predict])
-        X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(util.truncate_class_v2, args=[num_classes_predict])
+    print(f"Macro f1-score for male dataset: {male_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for female dataset: {female_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for high GPA dataset: {high_gpa_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
 
 
-    X_val_lens = get_X_lens_v2(X_val, course2vec_params['vec_size'])
-    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict)
-    y_val = y_val.values
+def evaluate_model_bias_single_df(model, course2vec_params, df, num_classes_predict=0, categories=False, top_n=1):
+    X, y = util.process_df_v3(df, num_classes_predict)
+
+    X_lens = get_X_lens_v2(X, course2vec_params['vec_size'])
+    X = featurize_student_v2(X, course2vec_params, num_classes_predict)
+    y = y.values
     if categories:
-        y_val = util.degrees_to_categories(y_val)
+        y = util.degrees_to_categories(y)
 
-    return evaluate_model(X_val, X_val_lens, y_val, model, output_dict=True, categories=categories, top_n=top_n)
+    return evaluate_model(X, X_lens, y, model, output_dict=True, categories=categories, top_n=top_n)
 
 
 def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top_n=1, pretrained_lstm=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False):
@@ -166,9 +167,9 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=30
+    epochs=1
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
-    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True, categories=False, top_n=1)
+    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, categories=False, top_n=1)
 
 if __name__ == '__main__':
     main()
