@@ -170,33 +170,6 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
     return best_model
 
 
-def evaluate_model_bias(model, num_classes_predict=0, categories=False, top_n=1):
-    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df = util.get_bias_datasets()
-
-    gender_stem_report = evaluate_model_bias_single_df(model, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gender_stem_anti_report = evaluate_model_bias_single_df(model, gender_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_report = evaluate_model_bias_single_df(model, gpa_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_anti_report = evaluate_model_bias_single_df(model, gpa_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-
-    print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
-
-
-def evaluate_model_bias_single_df(model, df, num_classes_predict=0, categories=False, top_n=1):
-    X_val = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
-    y_val = df['ACAD_PLAN_1']
-
-    if num_classes_predict > 0:
-        X_val['course_history'] = X_val['course_history'].apply(util.truncate_class_v2, args=[num_classes_predict])
-        X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(util.truncate_class_v2, args=[num_classes_predict])
-        X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(util.truncate_class_v2, args=[num_classes_predict])
-
-    X_val_lens = get_X_lens_v2(X_val, num_classes_predict)
-    return evaluate_model(X_val, X_val_lens, y_val, model, output_dict=True, categories=categories, top_n=top_n)
-
-
 def evaluate_model(X, X_lens, y, model, output_dict=True, categories=False, top_n=1):
     model.eval()
     batch_size = 32
