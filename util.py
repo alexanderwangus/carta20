@@ -24,6 +24,16 @@ COURSE_OUTCOME_LIST_TEST_FILE = DATA_DIR + 'course_outcome_lists_test.pkl'
 
 DEGREE_CATEGORY_FILE = DATA_DIR + 'degree_to_degree_category.csv'
 
+GENDER_STEM_STEREOTYPE_VAL_FILE = DATA_DIR + 'gender_stem_stereotype_val.pkl'
+GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE = DATA_DIR + 'gender_stem_anti_stereotype_val.pkl'
+GENDER_STEM_STEREOTYPE_TEST_FILE = DATA_DIR + 'gender_stem_stereotype_test.pkl'
+GENDER_STEM_ANTI_STEREOTYPE_TEST_FILE = DATA_DIR + 'gender_stem_anti_stereotype_test.pkl'
+
+GPA_STEM_STEREOTYPE_VAL_FILE = DATA_DIR + 'gpa_stem_stereotype_val.pkl'
+GPA_STEM_ANTI_STEREOTYPE_VAL_FILE = DATA_DIR + 'gpa_stem_anti_stereotype_val.pkl'
+GPA_STEM_STEREOTYPE_TEST_FILE = DATA_DIR + 'gpa_stem_stereotype_test.pkl'
+GPA_STEM_ANTI_STEREOTYPE_TEST_FILE = DATA_DIR + 'gpa_stem_anti_stereotype_test.pkl'
+
 
 MAJOR_LIST = ['BIOE', 'FILM', 'POLSC', 'CEE', 'HUMBI', 'CS', 'MATH', 'LAMER', 'EASST', 'ANSCI', 'AMSTU', 'MODLAN', 'PHYS', 'COMMU', 'ENVSE', 'INTLR', 'HUMAN', 'ASAM', 'DRAMA', 'CLASS', 'VTSS', 'IDMJR', 'PORT', 'ARTHS', 'SOCIS', 'ECON', 'IE', 'GS', 'GEOPH', 'ENVEN', 'IDMHS', 'HSTRY', 'FRENC', 'HUMRTS', 'MATCS', 'CE', 'ERE', 'GLBLST', 'POLSS', 'ENGR', 'ENGLI', 'COMMUS', 'CRWRIT', 'CHEM', 'LING', 'CHICA', 'INSST', 'PUBPO', 'PSYCH', 'FEMST', 'ARCHA', 'AFRAM', 'ETHSO', 'SOCIO', 'AA', 'NATAM', 'MATSC', 'ITAL', 'PHREL', 'PHILO', 'SPAN', 'ENGLF', 'STS', 'URBST', 'EASYS', 'CASA', 'AFRST', 'ANTHS', 'ENGLG', 'JAPAN', 'ENGL', 'MGTSC', 'BIOL', 'PETEN', 'CHILT', 'ANTHR', 'MELLC', 'ART', 'ME', 'CHINE', 'EE', 'FRENI', 'EDUC', 'ARTP', 'RELST', 'BIO', 'ILAC', 'ED', 'MUSIC', 'GERST', 'CSRE', 'FGSS', 'CPLIT', 'CHEME', 'HUMLG', 'SLAV', 'THPST', 'IDSH', 'SYMBO', 'ESTP', 'IDMEN', 'GES', 'AMELLC', 'ENGLS']
 
@@ -405,6 +415,24 @@ def degrees_to_categories_single(c, dict):
         return dict[c]
     else:
         return 'OTHER'
+
+
+"""
+Bias testing helper functions
+"""
+def get_bias_datasets(split="val"):
+    if split == "val":
+        gender_stem_df = pandas.read_pickle(GENDER_STEM_STEREOTYPE_VAL_FILE)
+        gender_stem_anti_df = pandas.read_pickle(GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE)
+        gpa_stem_anti_df = pandas.read_pickle(GPA_STEM_STEREOTYPE_VAL_FILE)
+        gpa_stem_anti_df = pandas.read_pickle(GPA_STEM_ANTI_STEREOTYPE_VAL_FILE)
+    else:
+        gender_stem_df = pandas.read_pickle(GENDER_STEM_STEREOTYPE_TEST_FILE)
+        gender_stem_anti_df = pandas.read_pickle(GENDER_STEM_ANTI_STEREOTYPE_TEST_FILE)
+        gpa_stem_anti_df = pandas.read_pickle(GPA_STEM_STEREOTYPE_TEST_FILE)
+        gpa_stem_anti_df = pandas.read_pickle(GPA_STEM_ANTI_STEREOTYPE_TEST_FILE)
+
+    return gender_stem_df, gender_stem_anti_df, gpa_stem_anti_df, gpa_stem_anti_df
 
 
 def main():

@@ -7,11 +7,38 @@ from gensim.models import Word2Vec
 from models.logistic_regression_model import train_log_reg
 from sklearn.metrics import classification_report
 from course_embeddings.course2vec import get_course2vec_model_path, train_course2vec, featurize_student, create_training_set
+import numpy as np
 
-TRAIN_LENGTH = 30
-PREDICT_LENGTH = 30
+TRAIN_LENGTH = 20
+PREDICT_LENGTH = 20
 
-def log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=2, epochs=10, num_classes_val=-1):
+def top_n_conversion(y, y_pred):
+    y_top_n = []
+    for i in range(len(y)):
+        if y[i] in y_pred[i]:
+            y_top_n.append(y[i])
+        else:
+            y_top_n.append(y_pred[i][0])
+    return y_top_n
+
+
+def evaluate_model(X, y, model, output_dict=False, top_n=1):
+    if top_n == 1:
+        y_pred = model.predict(list(X))
+    else:
+        classes = model.classes_
+        idx_to_class = {i: classes[i] for i in range(len(classes))}
+
+        y_pred_probs = model.predict_proba(list(X))
+        y_pred = (-y_pred_probs).argsort(axis=-1)[:, :top_n]
+
+        y_pred = [[idx_to_class[idx] for idx in p] for p in y_pred]
+        y_pred = top_n_conversion(y.values, y_pred)
+
+    return classification_report(y, y_pred, zero_division=0, output_dict=output_dict)
+
+
+def log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=2, epochs=10, num_classes_val=-1, categories=False, top_n=1):
     print(f"\nRunning course2vec with logreg with vec_size={vec_size}, win_size={win_size}, min_count={min_count}, epochs={epochs}, num_classes_val={num_classes_val}")
 
     # set up hyperparams, load model
@@ -29,17 +56,21 @@ def log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=2
     X_train = featurize_student(X_train['course_history'], course2vec_model, vec_size)
     X_val = featurize_student(X_val['course_history'], course2vec_model, vec_size)
 
+    if categories:
+        y_train = util.degrees_to_categories(y_train)
+        y_val = util.degrees_to_categories(y_val)
+
     # train and predict using logistic regression model
     train_score, log_reg_model = train_log_reg(list(X_train), y_train)
     print(f"train_score: {train_score}")
-    y_pred = log_reg_model.predict(list(X_val))
-    macro_f1 = classification_report(y_val, y_pred, output_dict=True, zero_division=0)['macro avg']['f1-score']
-    print(classification_report(y_val, y_pred, zero_division=0))
+    # y_pred = log_reg_model.predict(list(X_val))
+    macro_f1 = evaluate_model(X_val, y_val, log_reg_model, output_dict=True, top_n=top_n)['macro avg']['f1-score']
+    print(evaluate_model(X_val, y_val, log_reg_model, output_dict=False, top_n=top_n))
     return macro_f1, log_reg_model
 
 def main():
     # training_set = create_training_set()
-    log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=1, epochs=10)
+    log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=1, epochs=10, categories=False, top_n=3)
 
 if __name__ == '__main__':
     main()

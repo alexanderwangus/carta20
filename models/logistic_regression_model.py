@@ -7,10 +7,11 @@ import os
 import util
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
+import logistic_regression_course2vec
 import pickle
 
-TRAIN_LENGTH = 30
-PREDICT_LENGTH = 30
+TRAIN_LENGTH = 20
+PREDICT_LENGTH = 20
 
 def train_log_reg(X, y):
     reg = LogisticRegression().fit(X, y)
@@ -44,26 +45,31 @@ def multiclass_forecast():
 '''
 Trains on full course histories, but predicts on truncated course histories.
 '''
-def multiclass_forecast_full(num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, model=None):
+def multiclass_forecast_full(num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, model=None, categories=False, top_n=1):
     X_train, X_val, X_test, y_train, y_val, y_test = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, vectorize=True)
+
+    if categories:
+        y_train = util.degrees_to_categories(y_train)
+        y_val = util.degrees_to_categories(y_val)
+
+
     if not model:
         train_score, reg = train_log_reg(X_train, y_train)
         print(train_score)
         pickle.dump(reg, open("log_reg_full_train.pickle", 'wb'))
     else:
+
         reg = pickle.load(open(model, 'rb'))
 
-    val_score = reg.score(X_val, y_val)
-    print(val_score)
 
-    y_pred = reg.predict(X_val)
-    print(y_pred)
-    print(classification_report(y_val, y_pred))
+    macro_f1 = logistic_regression_course2vec.evaluate_model(X_val, y_val, reg, output_dict=True, top_n=top_n)['macro avg']['f1-score']
+    print(logistic_regression_course2vec.evaluate_model(X_val, y_val, reg, output_dict=False, top_n=top_n))
+    return macro_f1, reg
 
 
 def main():
     # multiclass_forecast_full(model="log_reg_full_train.pickle")
-    multiclass_forecast_full()
+    multiclass_forecast_full(categories=False, top_n=3)
 
 
 if __name__ == '__main__':
