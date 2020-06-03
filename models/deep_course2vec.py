@@ -195,7 +195,7 @@ def evaluate_model(X, X_lens, y, model, output_dict=True, categories=False, top_
         if top_n != 1:
             y_pred = util.top_n_conversion(y, y_pred)
 
-        print(y_pred)
+        print(X)
 
 
         return classification_report(y, y_pred, zero_division=0, output_dict=output_dict)
