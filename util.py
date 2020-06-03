@@ -433,7 +433,7 @@ def get_bias_datasets(split="val"):
         gpa_stem_anti_df = pd.read_pickle(GPA_STEM_STEREOTYPE_TEST_FILE)
         gpa_stem_anti_df = pd.read_pickle(GPA_STEM_ANTI_STEREOTYPE_TEST_FILE)
 
-    return gender_stem_df, gender_stem_anti_df, gpa_stem_anti_df, gpa_stem_anti_df
+    return gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df
 
 
 def main():
