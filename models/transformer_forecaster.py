@@ -213,11 +213,7 @@ def evaluate_model_bias_single_df(model, torch_texts, df, num_classes_predict=0,
         X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(util.truncate_class_v2, args=[num_classes_predict])
 
     X_val_lens = get_X_lens_v2(X_val, num_classes_predict)
-
     X_val = featurize_data(X_val, course_torchtext, term_torchtext, grade_torchtext, num_classes_predict)
-    print(X_val_lens[0])
-    print(X_val[0])
-    print(y_val[0])
 
     y_val = y_val.values
     if categories:
