@@ -13,6 +13,22 @@ import pickle
 TRAIN_LENGTH = 20
 PREDICT_LENGTH = 20
 
+def evaluate_model(X, y, model, output_dict=False, top_n=1):
+    if top_n == 1:
+        y_pred = model.predict(list(X))
+    else:
+        classes = model.classes_
+        idx_to_class = {i: classes[i] for i in range(len(classes))}
+
+        y_pred_probs = model.predict_proba(list(X))
+        y_pred = (-y_pred_probs).argsort(axis=-1)[:, :top_n]
+
+        y_pred = [[idx_to_class[idx] for idx in p] for p in y_pred]
+        y_pred = top_n_conversion(y.values, y_pred)
+
+    return classification_report(y, y_pred, zero_division=0, output_dict=output_dict)
+
+
 def train_log_reg(X, y):
     reg = LogisticRegression().fit(X, y)
     train_score = reg.score(X, y)
@@ -62,8 +78,8 @@ def multiclass_forecast_full(num_classes_train=TRAIN_LENGTH, num_classes_predict
         reg = pickle.load(open(model, 'rb'))
 
 
-    macro_f1 = logistic_regression_course2vec.evaluate_model(X_val, y_val, reg, output_dict=True, top_n=top_n)['macro avg']['f1-score']
-    print(logistic_regression_course2vec.evaluate_model(X_val, y_val, reg, output_dict=False, top_n=top_n))
+    macro_f1 = evaluate_model(X_val, y_val, reg, output_dict=True, top_n=top_n)['macro avg']['f1-score']
+    print(evaluate_model(X_val, y_val, reg, output_dict=False, top_n=top_n))
     return macro_f1, reg
 
 

@@ -14,8 +14,8 @@ import itertools
 import copy
 
 
-TRAIN_LENGTH = 30
-PREDICT_LENGTH = 30
+TRAIN_LENGTH = 10
+PREDICT_LENGTH = 10
 
 
 class TransformerForecaster(nn.Module):

@@ -1,12 +1,13 @@
 import sys
 import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
+sys.path.insert(1, os.path.join(sys.path[0], '../course_embeddings'))
 
 import util
 from gensim.models import Word2Vec
-from models.logistic_regression_model import train_log_reg
+from logistic_regression_model import train_log_reg, evaluate_model
 from sklearn.metrics import classification_report
-from course_embeddings.course2vec import get_course2vec_model_path, train_course2vec, featurize_student, create_training_set
+from course2vec import get_course2vec_model_path, train_course2vec, featurize_student, create_training_set
 import numpy as np
 
 TRAIN_LENGTH = 20
@@ -20,22 +21,6 @@ def top_n_conversion(y, y_pred):
         else:
             y_top_n.append(y_pred[i][0])
     return y_top_n
-
-
-def evaluate_model(X, y, model, output_dict=False, top_n=1):
-    if top_n == 1:
-        y_pred = model.predict(list(X))
-    else:
-        classes = model.classes_
-        idx_to_class = {i: classes[i] for i in range(len(classes))}
-
-        y_pred_probs = model.predict_proba(list(X))
-        y_pred = (-y_pred_probs).argsort(axis=-1)[:, :top_n]
-
-        y_pred = [[idx_to_class[idx] for idx in p] for p in y_pred]
-        y_pred = top_n_conversion(y.values, y_pred)
-
-    return classification_report(y, y_pred, zero_division=0, output_dict=output_dict)
 
 
 def log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=2, epochs=10, num_classes_val=-1, categories=False, top_n=1):
