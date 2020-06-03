@@ -229,7 +229,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     data, num_tokens, torch_texts = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment, categories=categories)
 
     batch_size = 32
-    epochs = 30
+    epochs = 1
 
     num_layers = 1
     num_heads = 4
