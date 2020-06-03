@@ -266,7 +266,7 @@ def process_df_v3(df, num_classes):
     X['CRSE_GRADE_INPUT'] = X['CRSE_GRADE_INPUT'].apply(word_tokenize)
 
     if num_classes > 0:
-        X['course_history'] = X['course_history'].apply(truncate_class_v2, args=[num_classes_train])
+        X['course_history'] = X['course_history'].apply(truncate_class_v2, args=[num_classes])
 
     return X, y
 
