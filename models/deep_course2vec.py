@@ -194,7 +194,7 @@ def evaluate_model_bias_single_df(model, df, num_classes_predict=0, categories=F
         X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(util.truncate_class_v2, args=[num_classes_predict])
 
     X_val_lens = get_X_lens_v2(X_val, num_classes_predict)
-    return evaluate_model(X_val, X_val_lens, y, model, output_dict=True, categories=categories, top_n=top_n)
+    return evaluate_model(X_val, X_val_lens, y_val, model, output_dict=True, categories=categories, top_n=top_n)
 
 
 def evaluate_model(X, X_lens, y, model, output_dict=True, categories=False, top_n=1):
