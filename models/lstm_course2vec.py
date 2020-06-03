@@ -68,13 +68,13 @@ class LSTMForecaster(nn.Module):
             return top_n_indices
 
 
-def evaluate_model_bias(model, vec_size, num_classes_predict=0, categories=False, top_n=1):
+def evaluate_model_bias(model, course2vec_params, num_classes_predict=0, categories=False, top_n=1):
     gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df = util.get_bias_datasets()
 
-    gender_stem_report = evaluate_model_bias_single_df(model, gender_stem_df, vec_size, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gender_stem_anti_report = evaluate_model_bias_single_df(model, gender_stem_anti_df, vec_size, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_report = evaluate_model_bias_single_df(model, gpa_stem_df, vec_size, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_anti_report = evaluate_model_bias_single_df(model, gpa_stem_anti_df, vec_size, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_report = evaluate_model_bias_single_df(model, gender_stem_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_anti_report = evaluate_model_bias_single_df(model, gender_stem_anti_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_report = evaluate_model_bias_single_df(model, gpa_stem_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_anti_report = evaluate_model_bias_single_df(model, gpa_stem_anti_df, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
     print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
@@ -82,7 +82,7 @@ def evaluate_model_bias(model, vec_size, num_classes_predict=0, categories=False
     print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
 
 
-def evaluate_model_bias_single_df(model, df, vec_size, num_classes_predict=0, categories=False, top_n=1):
+def evaluate_model_bias_single_df(model, df, course2vec_params, num_classes_predict=0, categories=False, top_n=1):
     X_val = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
     y_val = df['ACAD_PLAN_1']
 
@@ -92,7 +92,7 @@ def evaluate_model_bias_single_df(model, df, vec_size, num_classes_predict=0, ca
         X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(util.truncate_class_v2, args=[num_classes_predict])
 
 
-    X_val_lens = get_X_lens_v2(X_val, vec_size)
+    X_val_lens = get_X_lens_v2(X_val, course2vec_params['vec_size'])
     X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict)
     y_val = y_val.values
     if categories:
@@ -151,7 +151,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     val_results = evaluate_model(X_val, X_val_lens, y_val, lstm_model, output_dict=False, top_n=top_n, categories=categories)
     print(val_results)
 
-    evaluate_model_bias(lstm_model, vec_size, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    evaluate_model_bias(lstm_model, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
 
 def get_lstm_model_path(input_size, batch_size, num_layers, hidden_size, lr, dropout):
@@ -162,9 +162,9 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=1
+    epochs=30
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
-    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True, categories=True, top_n=1)
+    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=True, categories=False, top_n=1)
 
 if __name__ == '__main__':
     main()
