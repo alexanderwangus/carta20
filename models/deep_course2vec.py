@@ -171,10 +171,17 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
 
 
 def evaluate_model_bias(model, num_classes_predict=0, categories=False, top_n=1):
-    gender_stem_df, gender_stem_anti_df, gpa_stem_anti_df, gpa_stem_anti_df = util.get_bias_datasets()
+    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df = util.get_bias_datasets()
 
     gender_stem_report = evaluate_model_bias_single_df(model, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_anti_report = evaluate_model_bias_single_df(model, gender_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_report = evaluate_model_bias_single_df(model, gpa_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_anti_report = evaluate_model_bias_single_df(model, gpa_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+
     print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
 
 
 def evaluate_model_bias_single_df(model, df, num_classes_predict=0, categories=False, top_n=1):
