@@ -193,13 +193,15 @@ def evaluate_model_bias(model, torch_texts, num_classes_predict=0, categories=Fa
     gpa_stem_report = evaluate_model_bias_single_df(model, torch_texts, gpa_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
     gpa_stem_anti_report = evaluate_model_bias_single_df(model, torch_texts, gpa_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
+    print(evaluate_model_bias_single_df(model, torch_texts, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False))
+
     print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
 
 
-def evaluate_model_bias_single_df(model, torch_texts, df, num_classes_predict=0, categories=False, top_n=1):
+def evaluate_model_bias_single_df(model, torch_texts, df, num_classes_predict=0, categories=False, top_n=1, output_dict=True):
     (course_torchtext, term_torchtext, grade_torchtext) = torch_texts
 
     X_val = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
@@ -218,7 +220,7 @@ def evaluate_model_bias_single_df(model, torch_texts, df, num_classes_predict=0,
     if categories:
         y_val = util.degrees_to_categories(y_val)
 
-    return evaluate_model(X_val, X_val_lens, y_val, model, output_dict=True, categories=categories, top_n=top_n)
+    return evaluate_model(X_val, X_val_lens, y_val, model, output_dict=output_dict, categories=categories, top_n=top_n)
 
 
 def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False, categories=False, top_n=1):
