@@ -280,41 +280,6 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
     X_val, y_val = process_df_v3(df_val, num_classes_predict)
     X_test, y_test = process_df_v3(df_test, num_classes_predict)
 
-    # y_train = df_train['ACAD_PLAN_1']
-    # y_val = df_val['ACAD_PLAN_1']
-    # y_test = df_test['ACAD_PLAN_1']
-    #
-    # X_train = df_train.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
-    # X_val = df_val.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
-    # X_test = df_test.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
-    #
-    # X_train['course_history'] = X_train['course_history'].apply(word_tokenize)
-    # X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(word_tokenize)
-    # X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(word_tokenize)
-    #
-    # X_val['course_history'] = X_val['course_history'].apply(word_tokenize)
-    # X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(word_tokenize)
-    # X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(word_tokenize)
-    #
-    # X_test['course_history'] = X_test['course_history'].apply(word_tokenize)
-    # X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(word_tokenize)
-    # X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(word_tokenize)
-    #
-    #
-    # if num_classes_train > 0:
-    #     X_train['course_history'] = X_train['course_history'].apply(truncate_class_v2, args=[num_classes_train])
-    #     X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_train])
-    #     X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_train])
-    #
-    # if num_classes_predict > 0:
-    #     X_val['course_history'] = X_val['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
-    #     X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
-    #     X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
-    #
-    #     X_test['course_history'] = X_test['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
-    #     X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
-    #     X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
-
     if vectorize:
         vectorizer, X_train = vectorize_course_history(X_train.loc[:, 'course_history'])
         _, X_val = vectorize_course_history(X_val.loc[:, 'course_history'], vectorizer=vectorizer)

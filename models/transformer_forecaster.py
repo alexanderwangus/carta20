@@ -206,18 +206,6 @@ def evaluate_model_bias_single_df(model, torch_texts, df, num_classes_predict=0,
 
     X, y = util.process_df_v3(df, num_classes_predict)
 
-    # X_val = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
-    # y_val = df['ACAD_PLAN_1']
-    #
-    # X_val['course_history'] = X_val['course_history'].apply(word_tokenize)
-    # X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(word_tokenize)
-    # X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(word_tokenize)
-    #
-    # if num_classes_predict > 0:
-    #     X_val['course_history'] = X_val['course_history'].apply(util.truncate_class_v2, args=[num_classes_predict])
-    #     X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(util.truncate_class_v2, args=[num_classes_predict])
-    #     X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(util.truncate_class_v2, args=[num_classes_predict])
-
     X_lens = get_X_lens_v2(X, num_classes_predict)
     X = featurize_data(X, course_torchtext, term_torchtext, grade_torchtext, num_classes_predict)
 
@@ -235,7 +223,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     data, num_tokens, torch_texts = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment, categories=categories)
 
     batch_size = 32
-    epochs = 1
+    epochs = 30
 
     num_layers = 1
     num_heads = 4
