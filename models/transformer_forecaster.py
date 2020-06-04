@@ -153,13 +153,16 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
 
     X_train_lens = get_X_lens_v2(X_train, TRAIN_LENGTH)
     X_val_lens = get_X_lens_v2(X_val, PREDICT_LENGTH)
+    X_test_lens = get_X_lens_v2(X_val, PREDICT_LENGTH)
 
 
     if subtokenize:
         X_train = subtokenize_features(X_train)
         X_val = subtokenize_features(X_val)
+        X_test = subtokenize_features(X_test)
         X_train_lens = get_X_lens_v2(X_train, -1)
         X_val_lens = get_X_lens_v2(X_val, -1)
+        X_test_lens = get_X_lens_v2(X_test, -1)
 
 
     course_torchtext = get_torchtext(X_train["course_history"], dummy_tokenizer)
@@ -173,46 +176,23 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
 
     X_train = featurize_data(X_train, course_torchtext, term_torchtext, grade_torchtext, TRAIN_LENGTH)
     X_val = featurize_data(X_val, course_torchtext, term_torchtext, grade_torchtext, PREDICT_LENGTH)
+    X_test = featurize_data(X_test, course_torchtext, term_torchtext, grade_torchtext, PREDICT_LENGTH)
 
 
     y_train = y_train.values
     y_val = y_val.values
+    y_test = y_test.values
     if categories:
         y_train = util.degrees_to_categories(y_train)
         y_val = util.degrees_to_categories(y_val)
+        y_test = util.degrees_to_categories(y_test)
 
 
-    return (X_train, X_train_lens, y_train, X_val, X_val_lens, y_val), (n_course_tokens, n_term_tokens, n_grade_tokens), (course_torchtext, term_torchtext, grade_torchtext)
+    return (X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, X_test, X_test_lens, y_test), (n_course_tokens, n_term_tokens, n_grade_tokens), (course_torchtext, term_torchtext, grade_torchtext)
 
 
-def evaluate_model_bias(model, torch_texts, num_classes_predict=0, categories=False, top_n=1):
-    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gp_df = util.get_bias_datasets()
-
-    gender_stem_report = evaluate_model_bias_single_df(model, torch_texts, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gender_stem_anti_report = evaluate_model_bias_single_df(model, torch_texts, gender_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_report = evaluate_model_bias_single_df(model, torch_texts, gpa_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_anti_report = evaluate_model_bias_single_df(model, torch_texts, gpa_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-
-    male_report = evaluate_model_bias_single_df(model, torch_texts, male_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    female_report = evaluate_model_bias_single_df(model, torch_texts, female_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    high_gpa_report = evaluate_model_bias_single_df(model, torch_texts, high_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    low_gpa_report = evaluate_model_bias_single_df(model, torch_texts, low_gp_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-
-    # print(evaluate_model_bias_single_df(model, torch_texts, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False))
-
-    print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
-
-    print(f"Macro f1-score for male dataset: {male_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for female dataset: {female_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for high GPA dataset: {high_gpa_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
-
-
-def evaluate_model_bias_single_df(model, torch_texts, df, num_classes_predict=0, categories=False, top_n=1, output_dict=True):
-    (course_torchtext, term_torchtext, grade_torchtext) = torch_texts
+def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, categories=False, top_n=1, output_dict=True):
+    (course_torchtext, term_torchtext, grade_torchtext) = args
 
     X, y = util.process_df_v3(df, num_classes_predict)
 
@@ -260,10 +240,10 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
         with open(transformer_model_path, 'wb') as f:
             torch.save(transformer_model.state_dict(), f)
 
-    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
-    val_results = evaluate_model(X_val, X_val_lens, y_val, transformer_model, output_dict=False, categories=categories, top_n=top_n)
+    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, X_test, X_test_lens, y_test = data
+    val_results = evaluate_model(X_test, X_test_lens, y_test, transformer_model, output_dict=False, categories=categories, top_n=top_n)
     print(val_results)
-    evaluate_model_bias(transformer_model, torch_texts, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    util.evaluate_model_bias(transformer_model, torch_texts, evaluate_model_bias_single_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, test=True)
 
 
 def hyperparam_search(pretrained_transformer=False, training_set=None, num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, augment=False, categories=False, top_n=1):
@@ -271,7 +251,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
     print(f"subtokenize = {subtokenize}, augmentation = {augment}, degree categories = {categories}")
 
     data, num_tokens, _ = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment, categories=categories)
-    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
+    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, X_test, X_test_lens, y_test = data
 
     batch_size = 32
     epochs = 30
@@ -321,7 +301,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
 
 
 def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads, lr, num_tokens, dropout, dim_feedforward, verbose=True, categories=False, top_n=1):
-    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val = data
+    X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, X_test, X_test_lens, y_test = data
 
     transformer_model = TransformerForecaster(vec_size, num_tokens, \
         util.NUM_CLASSES, num_layers=num_layers, num_heads=num_heads, dropout=dropout, dim_feedforward=dim_feedforward)

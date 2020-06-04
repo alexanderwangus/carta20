@@ -441,18 +441,18 @@ def get_bias_datasets(test=False):
     return gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gpa_df
 
 
-def evaluate_model_bias(model, args, evaluate_model_bias_single_df, num_classes_predict=0, categories=False, top_n=1, test=False):
+def evaluate_model_bias(model, args, evaluation_fn, num_classes_predict=0, categories=False, top_n=1, test=False):
     gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gpa_df = get_bias_datasets(test=test)
 
-    gender_stem_report = evaluate_model_bias_single_df(model, gender_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gender_stem_anti_report = evaluate_model_bias_single_df(model, gender_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_report = evaluate_model_bias_single_df(model, gpa_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_anti_report = evaluate_model_bias_single_df(model, gpa_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_report = evaluation_fn(model, gender_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_anti_report = evaluation_fn(model, gender_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_report = evaluation_fn(model, gpa_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_anti_report = evaluation_fn(model, gpa_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
-    male_report = evaluate_model_bias_single_df(model, male_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    female_report = evaluate_model_bias_single_df(model, female_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    high_gpa_report = evaluate_model_bias_single_df(model, high_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    low_gpa_report = evaluate_model_bias_single_df(model, low_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    male_report = evaluation_fn(model, male_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    female_report = evaluation_fn(model, female_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    high_gpa_report = evaluation_fn(model, high_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    low_gpa_report = evaluation_fn(model, low_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
     print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
