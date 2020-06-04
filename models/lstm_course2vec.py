@@ -81,7 +81,6 @@ def evaluate_model_bias(model, course2vec_params, num_classes_predict=0, categor
     high_gpa_report = evaluate_model_bias_single_df(model, course2vec_params, high_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
     low_gpa_report = evaluate_model_bias_single_df(model, course2vec_params, low_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
 
-    # print(evaluate_model_bias_single_df(model, torch_texts, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False))
 
     print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
@@ -167,7 +166,7 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=1
+    epochs=30
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
     num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, categories=False, top_n=1)
 

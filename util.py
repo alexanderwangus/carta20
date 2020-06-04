@@ -46,7 +46,9 @@ LOW_GPA_TEST_FILE = BIAS_DIR + 'low_gpa_test.pkl'
 
 MAJOR_LIST = ['BIOE', 'FILM', 'POLSC', 'CEE', 'HUMBI', 'CS', 'MATH', 'LAMER', 'EASST', 'ANSCI', 'AMSTU', 'MODLAN', 'PHYS', 'COMMU', 'ENVSE', 'INTLR', 'HUMAN', 'ASAM', 'DRAMA', 'CLASS', 'VTSS', 'IDMJR', 'PORT', 'ARTHS', 'SOCIS', 'ECON', 'IE', 'GS', 'GEOPH', 'ENVEN', 'IDMHS', 'HSTRY', 'FRENC', 'HUMRTS', 'MATCS', 'CE', 'ERE', 'GLBLST', 'POLSS', 'ENGR', 'ENGLI', 'COMMUS', 'CRWRIT', 'CHEM', 'LING', 'CHICA', 'INSST', 'PUBPO', 'PSYCH', 'FEMST', 'ARCHA', 'AFRAM', 'ETHSO', 'SOCIO', 'AA', 'NATAM', 'MATSC', 'ITAL', 'PHREL', 'PHILO', 'SPAN', 'ENGLF', 'STS', 'URBST', 'EASYS', 'CASA', 'AFRST', 'ANTHS', 'ENGLG', 'JAPAN', 'ENGL', 'MGTSC', 'BIOL', 'PETEN', 'CHILT', 'ANTHR', 'MELLC', 'ART', 'ME', 'CHINE', 'EE', 'FRENI', 'EDUC', 'ARTP', 'RELST', 'BIO', 'ILAC', 'ED', 'MUSIC', 'GERST', 'CSRE', 'FGSS', 'CPLIT', 'CHEME', 'HUMLG', 'SLAV', 'THPST', 'IDSH', 'SYMBO', 'ESTP', 'IDMEN', 'GES', 'AMELLC', 'ENGLS']
 
-CATEGORY_LIST = ['EARTHSCI', 'EDUCATION', 'ENGR', 'H&S', 'H&S-HUM&ART', 'H&S-INTERDISC', 'H&S-NATSCI', 'H&S-SOCSCI', 'H&S-RESEARCH', 'INDIVIDUAL', 'INTERDISC', 'MEDICINE', 'UNDECLARED', 'OTHER']
+CATEGORY_LIST_OLD = ['EARTHSCI', 'EDUCATION', 'ENGR', 'H&S', 'H&S-HUM&ART', 'H&S-INTERDISC', 'H&S-NATSCI', 'H&S-SOCSCI', 'H&S-RESEARCH', 'INDIVIDUAL', 'INTERDISC', 'MEDICINE', 'UNDECLARED', 'OTHER']
+
+CATEGORY_LIST = ['EARTHSCI', 'ENGR', 'H&S-HUM&ART', 'H&S-INTERDISC', 'H&S-NATSCI', 'H&S-SOCSCI', 'OTHER']
 
 NUM_CLASSES = len(MAJOR_LIST) + 1
 NUM_CATEGORIES = len(CATEGORY_LIST) + 1
@@ -292,6 +294,7 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
         vectorizer, X_train = vectorize_course_history(X_train.loc[:, 'course_history'])
         _, X_val = vectorize_course_history(X_val.loc[:, 'course_history'], vectorizer=vectorizer)
         _, X_test = vectorize_course_history(X_test.loc[:, 'course_history'], vectorizer=vectorizer)
+        return (X_train, X_val, X_test, y_train, y_val, y_test), vectorizer
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
@@ -404,7 +407,7 @@ def degrees_to_categories(y):
 
 
 def degrees_to_categories_single(c, dict):
-    if c in dict:
+    if c in dict and dict[c] in CATEGORY_LIST:
         return dict[c]
     else:
         return 'OTHER'
@@ -413,8 +416,8 @@ def degrees_to_categories_single(c, dict):
 """
 Bias testing helper functions
 """
-def get_bias_datasets(split="val"):
-    if split == "val":
+def get_bias_datasets(test=False):
+    if not test:
         gender_stem_df = pd.read_pickle(GENDER_STEM_STEREOTYPE_VAL_FILE)
         gender_stem_anti_df = pd.read_pickle(GENDER_STEM_ANTI_STEREOTYPE_VAL_FILE)
         gpa_stem_df = pd.read_pickle(GPA_STEM_STEREOTYPE_VAL_FILE)
@@ -436,6 +439,30 @@ def get_bias_datasets(split="val"):
         low_gpa_df = pd.read_pickle(LOW_GPA_TEST_FILE)
 
     return gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gpa_df
+
+
+def evaluate_model_bias(model, args, evaluate_model_bias_single_df, num_classes_predict=0, categories=False, top_n=1, test=False):
+    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gpa_df = get_bias_datasets(test=test)
+
+    gender_stem_report = evaluate_model_bias_single_df(model, gender_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gender_stem_anti_report = evaluate_model_bias_single_df(model, gender_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_report = evaluate_model_bias_single_df(model, gpa_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    gpa_stem_anti_report = evaluate_model_bias_single_df(model, gpa_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+
+    male_report = evaluate_model_bias_single_df(model, male_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    female_report = evaluate_model_bias_single_df(model, female_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    high_gpa_report = evaluate_model_bias_single_df(model, high_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    low_gpa_report = evaluate_model_bias_single_df(model, low_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+
+    print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
+
+    print(f"Macro f1-score for male dataset: {male_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for female dataset: {female_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for high GPA dataset: {high_gpa_report['macro avg']['f1-score']}")
+    print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
 
 
 def main():
