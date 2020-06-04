@@ -68,32 +68,8 @@ class LSTMForecaster(nn.Module):
             return top_n_indices
 
 
-def evaluate_model_bias(model, course2vec_params, num_classes_predict=0, categories=False, top_n=1):
-    gender_stem_df, gender_stem_anti_df, gpa_stem_df, gpa_stem_anti_df, male_df, female_df, high_gpa_df, low_gpa_df = util.get_bias_datasets()
-
-    gender_stem_report = evaluate_model_bias_single_df(model, course2vec_params, gender_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gender_stem_anti_report = evaluate_model_bias_single_df(model, course2vec_params, gender_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_report = evaluate_model_bias_single_df(model, course2vec_params, gpa_stem_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    gpa_stem_anti_report = evaluate_model_bias_single_df(model, course2vec_params, gpa_stem_anti_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-
-    male_report = evaluate_model_bias_single_df(model, course2vec_params, male_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    female_report = evaluate_model_bias_single_df(model, course2vec_params, female_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    high_gpa_report = evaluate_model_bias_single_df(model, course2vec_params, high_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-    low_gpa_report = evaluate_model_bias_single_df(model, course2vec_params, low_gpa_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
-
-
-    print(f"Macro f1-score for Gender-STEM stereotype dataset: {gender_stem_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for Gender-STEM anti stereotype dataset: {gender_stem_anti_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for GPA-STEM stereotype dataset: {gpa_stem_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for GPA-STEM anti-stereotype dataset: {gpa_stem_anti_report['macro avg']['f1-score']}")
-
-    print(f"Macro f1-score for male dataset: {male_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for female dataset: {female_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for high GPA dataset: {high_gpa_report['macro avg']['f1-score']}")
-    print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
-
-
-def evaluate_model_bias_single_df(model, course2vec_params, df, num_classes_predict=0, categories=False, top_n=1):
+def evaluate_model_bias_single_df(model, args, df, num_classes_predict=0, categories=False, top_n=1):
+    course2vec_params = args
     X, y = util.process_df_v3(df, num_classes_predict)
 
     X_lens = get_X_lens_v2(X, course2vec_params['vec_size'])
@@ -126,11 +102,15 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     X_train = featurize_student_v2(X_train, course2vec_params, num_classes_train, subtokenize=subtokenize)
     X_val_lens = get_X_lens_v2(X_val, vec_size)
     X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=subtokenize)
+    X_test_lens = get_X_lens_v2(X_test, vec_size)
+    X_test = featurize_student_v2(X_test, course2vec_params, num_classes_predict, subtokenize=subtokenize)
     y_train = y_train.values
     y_val = y_val.values
+    y_test = y_test.values
     if categories:
         y_train = util.degrees_to_categories(y_train)
         y_val = util.degrees_to_categories(y_val)
+        y_test = util.degrees_to_categories(y_test)
 
     batch_size = 32
     num_layers = 1
@@ -152,10 +132,10 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
         with open(lstm_model_path, 'wb') as f:
             torch.save(lstm_model.state_dict(), f)
 
-    val_results = evaluate_model(X_val, X_val_lens, y_val, lstm_model, output_dict=False, top_n=top_n, categories=categories)
+    val_results = evaluate_model(X_test, X_test_lens, y_test, lstm_model, output_dict=False, top_n=top_n, categories=categories)
     print(val_results)
 
-    evaluate_model_bias(lstm_model, course2vec_params, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n)
+    evaluate_model_bias(lstm_model, course2vec_params, evaluate_model_bias_single_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, test=True)
 
 
 def get_lstm_model_path(input_size, batch_size, num_layers, hidden_size, lr, dropout):
