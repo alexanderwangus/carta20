@@ -68,7 +68,7 @@ class LSTMForecaster(nn.Module):
             return top_n_indices
 
 
-def evaluate_model_bias_single_df(model, args, df, num_classes_predict=0, categories=False, top_n=1):
+def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, categories=False, top_n=1):
     course2vec_params = args
     X, y = util.process_df_v3(df, num_classes_predict)
 
@@ -135,7 +135,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     val_results = evaluate_model(X_test, X_test_lens, y_test, lstm_model, output_dict=False, top_n=top_n, categories=categories)
     print(val_results)
 
-    evaluate_model_bias(lstm_model, course2vec_params, evaluate_model_bias_single_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, test=True)
+    util.evaluate_model_bias(lstm_model, course2vec_params, evaluate_model_bias_single_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, test=True)
 
 
 def get_lstm_model_path(input_size, batch_size, num_layers, hidden_size, lr, dropout):
