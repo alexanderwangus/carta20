@@ -3,6 +3,7 @@ import numpy as np
 import os
 from req_builder import Req, Subreq
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import classification_report
 import datetime
 import re
 import torch
@@ -463,6 +464,22 @@ def evaluate_model_bias(model, args, evaluation_fn, num_classes_predict=0, categ
     print(f"Macro f1-score for female dataset: {female_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for high GPA dataset: {high_gpa_report['macro avg']['f1-score']}")
     print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
+
+
+def evaluate_model(X, y, model, output_dict=False, top_n=1):
+    if top_n == 1:
+        y_pred = model.predict(list(X))
+    else:
+        classes = model.classes_
+        idx_to_class = {i: classes[i] for i in range(len(classes))}
+
+        y_pred_probs = model.predict_proba(list(X))
+        y_pred = (-y_pred_probs).argsort(axis=-1)[:, :top_n]
+
+        y_pred = [[idx_to_class[idx] for idx in p] for p in y_pred]
+        y_pred = top_n_conversion(y.values, y_pred)
+
+    return classification_report(y, y_pred, zero_division=0, output_dict=output_dict)
 
 
 def main():

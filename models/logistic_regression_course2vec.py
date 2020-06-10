@@ -5,7 +5,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '../course_embeddings'))
 
 import util
 from gensim.models import Word2Vec
-from logistic_regression_model import train_log_reg, evaluate_model, top_n_conversion
+from logistic_regression_model import train_log_reg, top_n_conversion
 from sklearn.metrics import classification_report
 from course2vec import get_course2vec_model_path, train_course2vec, featurize_student, create_training_set
 import numpy as np
@@ -22,7 +22,7 @@ def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, catego
     if categories:
         y = util.degrees_to_categories(y)
 
-    return evaluate_model(X, y, model, output_dict=True, top_n=top_n)
+    return util.evaluate_model(X, y, model, output_dict=True, top_n=top_n)
 
 
 def log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=2, epochs=10, num_classes_val=-1, categories=False, top_n=1):
@@ -53,8 +53,8 @@ def log_reg_course2vec(training_set=None, vec_size=150, win_size=10, min_count=2
     train_score, log_reg_model = train_log_reg(list(X_train), y_train)
     print(f"train_score: {train_score}")
     # y_pred = log_reg_model.predict(list(X_val))
-    macro_f1 = evaluate_model(X_test, y_test, log_reg_model, output_dict=True, top_n=top_n)['macro avg']['f1-score']
-    print(evaluate_model(X_test, y_test, log_reg_model, output_dict=False, top_n=top_n))
+    macro_f1 = util.evaluate_model(X_test, y_test, log_reg_model, output_dict=True, top_n=top_n)['macro avg']['f1-score']
+    print(util.evaluate_model(X_test, y_test, log_reg_model, output_dict=False, top_n=top_n))
 
     util.evaluate_model_bias(log_reg_model, (course2vec_model, vec_size), evaluate_model_bias_single_df, num_classes_predict=PREDICT_LENGTH, categories=categories, top_n=top_n, test=True)
 
