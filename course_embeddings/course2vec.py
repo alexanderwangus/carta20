@@ -10,6 +10,11 @@ import models.logistic_regression_model
 from sklearn.metrics import classification_report
 from ast import literal_eval
 
+"""
+This file defines all functionality needed to train a course2vec model.
+Util fns related to models downstream of this should be in course2vec_util.py
+"""
+
 
 def to_strlist(l):
     return [str(x) for x in l]

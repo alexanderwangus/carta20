@@ -60,6 +60,7 @@ IDX_TO_COURSE = {i+1: MAJOR_LIST[i] for i in range(len(MAJOR_LIST))}
 CATEGORY_TO_IDX = {CATEGORY_LIST[i]: i+1 for i in range(len(CATEGORY_LIST))}
 IDX_TO_CATEGORY = {i+1: CATEGORY_LIST[i] for i in range(len(CATEGORY_LIST))}
 
+
 def course_to_idx(course):
     if course in COURSE_TO_IDX:
         return COURSE_TO_IDX[course]
@@ -72,128 +73,6 @@ def category_to_idx(category):
         return CATEGORY_TO_IDX[category]
     else:
         return 0
-
-
-def load_vocab(path):
-    with open(path) as f:
-        vocab = f.readlines()
-        vocab = [w.strip().upper() for w in vocab]
-    return vocab
-
-
-def load_rev_vocab(vocab):
-    rev_vocab = dict([(x, y) for (y, x) in enumerate(vocab)])
-    return rev_vocab
-
-
-def load_courselist(path, limit=None):
-    with open(path) as f:
-        vocab = f.readlines()
-        vocab = [w.strip().upper() for w in vocab]
-    if limit:
-        return vocab[:limit]
-    return vocab
-
-
-'''
-Filter out students from dataframe X that do not fulfill given requirement req
-'''
-def filter_req(X, req, rev_vocab):
-    if isinstance(req, tuple):
-        print(req[0].reqs)
-    if req.all:
-        for r in req.reqs:
-            if isinstance(r, str):
-                if r not in rev_vocab:
-                    print(r, 'not in rev_vocab')
-                    continue
-                courseix = rev_vocab[r]
-                X = X[X.iloc[:,courseix] > 0]
-            elif isinstance(r, (Req, Subreq)):
-                stud_idx = filter_req(X, r, rev_vocab)
-                X = X[X.index.isin(stud_idx)]
-            else:
-                print(type(r), r.reqs)
-                raise TypeError
-        return X.index
-    else:
-        stud_filters = []
-        for r in req.reqs:
-            if isinstance(r, str):
-                if r not in rev_vocab:
-                    print(r, 'not in rev_vocab')
-                    continue
-                courseix = rev_vocab[r]
-                stud_filters.append(X.iloc[:,courseix] > 0)
-            elif isinstance(r, (Req, Subreq)):
-                stud_idx = filter_req(X, r, rev_vocab)
-                stud_filters.append(X.index.isin(stud_idx))
-            else:
-                print(type(r), r.reqs)
-                raise TypeError
-        filter_df = pd.DataFrame(stud_filters).T
-        return X.index[filter_df.sum(axis=1) >= req.num]
-
-
-'''
-Wrapper for filter_req
-'''
-def get_studlist(X, req, filename, rev_vocab):
-    stud_idx = filter_req(X, req, rev_vocab)
-    matches = stud_idx.to_series()
-    return matches
-
-
-'''
-Assigns students uniquely to different tracks
-'''
-def assign_unique_students(tracknames, track_students, track_priorities):
-    track_students_index = {}
-    for t in tracknames:
-        track_students_index[t] = pd.Index(track_students[t].values)
-
-    track_students_unique = {}
-    for t1 in tracknames:
-        idx1 = track_students_index[t1]
-        for t2 in tracknames:
-            if t1 != t2:
-                idx1 = idx1.difference(track_students_index[t2])
-                if track_priorities[t1] < track_priorities[t2]:
-                    overlap = track_students_index[t1].intersection(track_students_index[t2])
-                    idx1 = idx1.union(overlap)
-        track_students_unique[t1] = idx1
-    return track_students_unique
-
-'''
-Count number of courses that deviate from each req (i.e. no. of courses needed to fulfill req)
-'''
-def get_req_deviation(stud_row, req, rev_vocab):
-    dev = 0
-    for r in req.reqs:
-        if isinstance(r, str):
-            if r not in rev_vocab:
-                continue
-            courseix = rev_vocab[r]
-            if stud_row[courseix] <=0:
-                dev += 1
-        elif isinstance(r, Req) or isinstance(r, Subreq):
-            dev += get_req_deviation(stud_row, r, rev_vocab)
-        else:
-            print(type(r), r.reqs)
-            raise TypeError
-    if not req.all:
-        dev -= (len(req.reqs) - req.num) # TODO: debug. if a course is present in several reqs this algorithm looks like it double counts it
-    return max(0, dev)
-
-
-'''
-Count number of courses that deviate from each track (i.e. no. of courses needed to fulfill track)
-'''
-def get_tracks_deviation(stud_row, tracknames, tracks, rev_vocab):
-    tracks_dev = []
-    for t in tracknames:
-        tracks_dev.append(get_req_deviation(stud_row, tracks[t], rev_vocab))
-    return pd.Series(tracks_dev)
 
 
 '''
@@ -213,13 +92,24 @@ def vectorize_course_history(srs, vectorizer=None):
         X = vectorizer.transform(course_strings)
     return vectorizer, X.toarray()
 
-
+# TODO: rename
 def truncate_class(class_string, num_classes):
     return ','.join(list(class_string.split(','))[:num_classes])
 
-
+# TODO: rename
 def truncate_class_v2(class_list, num_classes):
     return class_list[:num_classes]
+
+
+def get_seq_len(course_list, max_length):
+    if max_length > 0:
+        return min(max_length, len(course_list))
+    else:
+        return len(course_list)
+
+
+def get_X_lens(X, max_length):
+    return [get_seq_len(seq, max_length) for _, seq in X["course_history"].items()]
 
 
 def get_vocab():
@@ -266,7 +156,7 @@ def word_tokenize(s):
         tokens = tokens[:-1]
     return tokens
 
-
+# TODO: rename to get rid of v3, and something more descriptive
 def process_df_v3(df, num_classes):
     y = df['ACAD_PLAN_1']
 
@@ -281,7 +171,7 @@ def process_df_v3(df, num_classes):
 
     return X, y
 
-
+# TODO: rename to just prep_dataset
 def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False, vectorize=False):
     df_train = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
     df_val = pd.read_pickle(COURSE_OUTCOME_LIST_VAL_FILE)
@@ -299,7 +189,7 @@ def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-
+# TODO: rename to draw distinction from v3
 def prep_dataset_v2(num_classes_train=-1, num_classes_predict=-1, augmented=False):
     if augmented:
         df = pd.read_pickle(COURSE_OUTCOME_LIST_FILE_AUGMENTED)
@@ -330,7 +220,7 @@ def prep_dataset_v2(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-
+# TODO: delete
 def prep_dataset(num_classes_predict=-1, vectorize=False):
     df = pd.read_feather(COURSE_MAJOR_FILE, use_threads=True)
 
@@ -358,7 +248,7 @@ def prep_dataset(num_classes_predict=-1, vectorize=False):
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-
+# TODO: rename
 # returns list of subtokens
 def subtokenize_single_course(course_str):
     match = re.match(r"([^0-9]+)([0-9]+)([^0-9]*)", course_str, re.I)
@@ -370,7 +260,7 @@ def subtokenize_single_course(course_str):
         items[2] = items[2][1:]
     return items
 
-
+# TODO: rename
 # returns list of subtokens
 def subtokenize_single_course_v2(course_str):
     match = re.match(r"([^0-9]+)([0-9]+)([^0-9]*)", course_str, re.I)

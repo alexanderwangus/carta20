@@ -4,6 +4,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 import util
 import deep_model_util
+import course2vec_util
 from gensim.models import Word2Vec
 from course_embeddings.course2vec import get_course2vec_model_path
 import torch
@@ -11,7 +12,6 @@ import torch.nn as nn
 from torch import optim
 import numpy as np
 import copy
-from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2
 
 TRAIN_LENGTH = 10
 PREDICT_LENGTH = 10
@@ -73,8 +73,8 @@ def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, catego
     course2vec_params = args
     X, y = util.process_df_v3(df, num_classes_predict)
 
-    X_lens = get_X_lens_v2(X, course2vec_params['vec_size'])
-    X = featurize_student_v2(X, course2vec_params, num_classes_predict)
+    X_lens = util.get_X_lens(X, course2vec_params['vec_size'])
+    X = course2vec_util.featurize_student_v2(X, course2vec_params, num_classes_predict)
     y = y.values
     if categories:
         y = util.degrees_to_categories(y)
@@ -99,12 +99,12 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     _, X_val, X_test, _, y_val, y_test = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
     X_train, _, _, y_train, _, _ = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
 
-    X_train_lens = get_X_lens_v2(X_train, vec_size)
-    X_train = featurize_student_v2(X_train, course2vec_params, num_classes_train, subtokenize=subtokenize)
-    X_val_lens = get_X_lens_v2(X_val, vec_size)
-    X_val = featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=subtokenize)
-    X_test_lens = get_X_lens_v2(X_test, vec_size)
-    X_test = featurize_student_v2(X_test, course2vec_params, num_classes_predict, subtokenize=subtokenize)
+    X_train_lens = util.get_X_lens(X_train, vec_size)
+    X_train = course2vec_util.featurize_student_v2(X_train, course2vec_params, num_classes_train, subtokenize=subtokenize)
+    X_val_lens = util.get_X_lens(X_val, vec_size)
+    X_val = course2vec_util.featurize_student_v2(X_val, course2vec_params, num_classes_predict, subtokenize=subtokenize)
+    X_test_lens = util.get_X_lens(X_test, vec_size)
+    X_test = course2vec_util.featurize_student_v2(X_test, course2vec_params, num_classes_predict, subtokenize=subtokenize)
     y_train = y_train.values
     y_val = y_val.values
     y_test = y_test.values
@@ -126,7 +126,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
         lstm_model.load_state_dict(torch.load(lstm_model_path))
     else:
         print(f"Training lstm")
-        lstm_model = train_model(lstm_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
+        lstm_model = deep_model_util.train_model(lstm_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
             epochs, batch_size, lr, top_n=top_n, categories=categories)
 
         print(f"Saving lstm to '{lstm_model_path}'")

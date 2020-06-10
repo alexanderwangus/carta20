@@ -4,9 +4,9 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 import util
 import deep_model_util
+import course2vec_util
 from gensim.models import Word2Vec
 from course_embeddings.course2vec import get_course2vec_model_path
-from deep_course2vec import subtokenize_features, get_X_lens_v2, train_model
 import torch
 import torch.nn as nn
 import numpy as np
@@ -31,13 +31,10 @@ class TransformerForecaster(nn.Module):
         encoder_layers = nn.TransformerEncoderLayer(3 * embed_size, num_heads, dim_feedforward=dim_feedforward, dropout=dropout)
         self.encoder = nn.TransformerEncoder(encoder_layers, num_layers)
 
-        # self.decoder = nn.Linear(3 * 3 * embed_size, num_classes)
         self.lstm_hidden_size = 512
         self.decoder = nn.LSTM(3 * embed_size, self.lstm_hidden_size, 1)
 
-        # self.relu = nn.ReLU()
         self.linear_1 = nn.Linear(self.lstm_hidden_size, num_classes)
-        # self.linear_2 = nn.Linear(embed_size, num_classes)
 
         self.init_weights()
 
@@ -51,8 +48,6 @@ class TransformerForecaster(nn.Module):
         self.linear_1.bias.data.zero_()
         self.linear_1.weight.data.uniform_(-initrange, initrange)
 
-        # self.decoder.bias.data.zero_()
-        # self.decoder.weight.data.uniform_(-initrange, initrange)
 
 
     def forward(self, sentences, X_lens):
@@ -69,7 +64,6 @@ class TransformerForecaster(nn.Module):
             idx = idx.cuda()
         lens_expanded = X_lens[:, None]  # (batch, 1)
         mask = idx >= lens_expanded
-        # print(mask.size())
 
         course_output = self.course_embedder(course_sentences)  # (batch, max_seq_len, embed_size)
         grade_output = self.grade_embedder(grade_sentences)
@@ -79,15 +73,10 @@ class TransformerForecaster(nn.Module):
         output = output.transpose(0, 1)
 
         output = self.encoder(output, src_key_padding_mask=mask)  # (max_seq_len, batch, 3 * embed_size)
-        # output_max, _ = torch.max(output, dim=0)
-        # output_min, _ = torch.min(output, dim=0)
-        # output = torch.cat([torch.mean(output, dim=0), output_max, output_min], dim=1)
         self.decoder.flatten_parameters()
         output, (h_n, c_n) = self.decoder(output)
-        # output = self.decoder(output)
 
         output = self.linear_1(h_n[-1])
-        # output = self.linear_2(self.relu(output))
 
         return output
 
@@ -152,18 +141,18 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
     X_train, _, _, y_train, _, _ = util.prep_dataset_v3(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, augmented=False)
 
 
-    X_train_lens = get_X_lens_v2(X_train, TRAIN_LENGTH)
-    X_val_lens = get_X_lens_v2(X_val, PREDICT_LENGTH)
-    X_test_lens = get_X_lens_v2(X_val, PREDICT_LENGTH)
+    X_train_lens = util.get_X_lens(X_train, TRAIN_LENGTH)
+    X_val_lens = util.get_X_lens(X_val, PREDICT_LENGTH)
+    X_test_lens = util.get_X_lens(X_val, PREDICT_LENGTH)
 
 
     if subtokenize:
-        X_train = subtokenize_features(X_train)
-        X_val = subtokenize_features(X_val)
-        X_test = subtokenize_features(X_test)
-        X_train_lens = get_X_lens_v2(X_train, -1)
-        X_val_lens = get_X_lens_v2(X_val, -1)
-        X_test_lens = get_X_lens_v2(X_test, -1)
+        X_train = util.subtokenize_features(X_train)
+        X_val = util.subtokenize_features(X_val)
+        X_test = util.subtokenize_features(X_test)
+        X_train_lens = util.get_X_lens(X_train, -1)
+        X_val_lens = util.get_X_lens(X_val, -1)
+        X_test_lens = util.get_X_lens(X_test, -1)
 
 
     course_torchtext = get_torchtext(X_train["course_history"], dummy_tokenizer)
@@ -197,7 +186,7 @@ def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, catego
 
     X, y = util.process_df_v3(df, num_classes_predict)
 
-    X_lens = get_X_lens_v2(X, num_classes_predict)
+    X_lens = util.get_X_lens(X, num_classes_predict)
     X = featurize_data(X, course_torchtext, term_torchtext, grade_torchtext, num_classes_predict)
 
     y = y.values
@@ -309,7 +298,7 @@ def train_transformer(epochs, data, vec_size, batch_size, num_layers, num_heads,
 
     if verbose:
         print(f"Training transformer")
-    transformer_model = train_model(transformer_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
+    transformer_model = deep_model_util.train_model(transformer_model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, \
         epochs, batch_size, lr, verbose=verbose, categories=categories, top_n=top_n)
 
     return transformer_model
