@@ -14,6 +14,10 @@ TRAIN_LENGTH = 5
 PREDICT_LENGTH = 5
 NUM_FEATURES = 3
 
+"""
+DEPRECATED. Code has changed around this file since it has last been updated, so it will likely not work.
+"""
+
 
 class TransformerClassifier(nn.Module):
     def __init__(self, input_size, num_classes, num_layers=3, num_heads=5):

@@ -3,6 +3,7 @@ import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 import util
+import deep_model_util
 from gensim.models import Word2Vec
 from course_embeddings.course2vec import get_course2vec_model_path
 import torch
@@ -10,7 +11,7 @@ import torch.nn as nn
 from torch import optim
 import numpy as np
 import copy
-from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2, evaluate_model
+from deep_course2vec import train_model, get_X_lens_v2, featurize_student_v2
 
 TRAIN_LENGTH = 10
 PREDICT_LENGTH = 10
@@ -78,7 +79,7 @@ def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, catego
     if categories:
         y = util.degrees_to_categories(y)
 
-    return evaluate_model(X, X_lens, y, model, output_dict=True, categories=categories, top_n=top_n)
+    return deep_model_util.evaluate_pytorch_model(X, X_lens, y, model, output_dict=True, categories=categories, top_n=top_n)
 
 
 def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top_n=1, pretrained_lstm=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False):
@@ -132,7 +133,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
         with open(lstm_model_path, 'wb') as f:
             torch.save(lstm_model.state_dict(), f)
 
-    val_results = evaluate_model(X_test, X_test_lens, y_test, lstm_model, output_dict=False, top_n=top_n, categories=categories)
+    val_results = deep_model_util.evaluate_pytorch_model(X_test, X_test_lens, y_test, lstm_model, output_dict=False, top_n=top_n, categories=categories)
     print(val_results)
 
     util.evaluate_model_bias(lstm_model, course2vec_params, evaluate_model_bias_single_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, test=True)
@@ -146,7 +147,7 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=30
+    epochs=1
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
     num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, categories=False, top_n=1)
 

@@ -3,6 +3,7 @@ import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 import util
+import deep_model_util
 from gensim.models import Word2Vec
 from models.logistic_regression_model import train_log_reg
 from sklearn.metrics import classification_report
@@ -112,7 +113,7 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories, top_n=top_n)
+    val_results = deep_model_util.evaluate_pytorch_model(X_val, X_val_lens, y_val, model, categories=categories, top_n=top_n)
     if verbose:
         print(f"== Pre-training val results (macro avg) ==")
         print(f"  Precision: {val_results['macro avg']['precision']}")
@@ -148,13 +149,13 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
             optimizer.step()
 
         if verbose:
-            train_results = evaluate_model(X_train, X_train_lens, y_train, model, categories=categories, top_n=top_n)
+            train_results = deep_model_util.evaluate_pytorch_model(X_train, X_train_lens, y_train, model, categories=categories, top_n=top_n)
             print(f"== Epoch {epoch+1} train results (macro avg) ==")
             print(f"  Precision: {train_results['macro avg']['precision']}")
             print(f"  Recall: {train_results['macro avg']['recall']}")
             print(f"  f1-score: {train_results['macro avg']['f1-score']}")
 
-        val_results = evaluate_model(X_val, X_val_lens, y_val, model, categories=categories, top_n=top_n)
+        val_results = deep_model_util.evaluate_pytorch_model(X_val, X_val_lens, y_val, model, categories=categories, top_n=top_n)
         if verbose:
             print(f"== Epoch {epoch+1} val results (macro avg) ==")
             print(f"  Precision: {val_results['macro avg']['precision']}")
@@ -168,31 +169,3 @@ def train_model(model, X_train, X_train_lens, y_train, X_val, X_val_lens, y_val,
             best_metric = val_results['macro avg']['f1-score']
 
     return best_model
-
-
-def evaluate_model(X, X_lens, y, model, output_dict=True, categories=False, top_n=1):
-    model.eval()
-    batch_size = 32
-
-    with torch.no_grad():
-        if categories:
-            y = torch.LongTensor([util.category_to_idx(course) for course in y])
-        else:
-            y = torch.LongTensor([util.course_to_idx(course) for course in y])
-        y_pred = []
-        for i in range(0, len(X), batch_size):
-            curr_batch_size = batch_size
-            if i + batch_size > len(X):
-                curr_batch_size = len(X) - i + 1
-
-            sentences = torch.FloatTensor(X[i:i+curr_batch_size])
-            sentence_lens = torch.LongTensor(X_lens[i:i+curr_batch_size])
-            if torch.cuda.is_available():
-                sentences = sentences.cuda()
-                sentence_lens = sentence_lens.cuda()
-            y_pred += model.predict(sentences, sentence_lens, top_n=top_n)
-
-        if top_n != 1:
-            y_pred = util.top_n_conversion(y, y_pred)
-
-        return classification_report(y, y_pred, zero_division=0, output_dict=output_dict)

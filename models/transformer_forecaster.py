@@ -3,9 +3,10 @@ import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 import util
+import deep_model_util
 from gensim.models import Word2Vec
 from course_embeddings.course2vec import get_course2vec_model_path
-from deep_course2vec import subtokenize_features, get_X_lens_v2, train_model, evaluate_model
+from deep_course2vec import subtokenize_features, get_X_lens_v2, train_model
 import torch
 import torch.nn as nn
 import numpy as np
@@ -203,7 +204,7 @@ def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, catego
     if categories:
         y = util.degrees_to_categories(y)
 
-    return evaluate_model(X, X_lens, y, model, output_dict=output_dict, categories=categories, top_n=top_n)
+    return deep_model_util.evaluate_pytorch_model(X, X_lens, y, model, output_dict=output_dict, categories=categories, top_n=top_n)
 
 
 def run_transformer_forecaster(pretrained_transformer=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False, augment=False, categories=False, top_n=1):
@@ -213,7 +214,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
     data, num_tokens, torch_texts = prep_data(num_classes_train=num_classes_train, num_classes_predict=num_classes_predict, subtokenize=subtokenize, augment=augment, categories=categories)
 
     batch_size = 32
-    epochs = 30
+    epochs = 1
 
     num_layers = 1
     num_heads = 4
@@ -241,7 +242,7 @@ def run_transformer_forecaster(pretrained_transformer=False, training_set=None, 
             torch.save(transformer_model.state_dict(), f)
 
     X_train, X_train_lens, y_train, X_val, X_val_lens, y_val, X_test, X_test_lens, y_test = data
-    val_results = evaluate_model(X_test, X_test_lens, y_test, transformer_model, output_dict=False, categories=categories, top_n=top_n)
+    val_results = deep_model_util.evaluate_pytorch_model(X_test, X_test_lens, y_test, transformer_model, output_dict=False, categories=categories, top_n=top_n)
     print(val_results)
     util.evaluate_model_bias(transformer_model, torch_texts, evaluate_model_bias_single_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, test=True)
 
@@ -283,7 +284,7 @@ def hyperparam_search(pretrained_transformer=False, training_set=None, num_class
         transformer_model = train_transformer(epochs, data, vs, bs, nl, nh, lr,\
             num_tokens, dp, d_ff, verbose=False, categories=categories)
 
-        metric = evaluate_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True, categories=categories)['macro avg']['f1-score']
+        metric = deep_model_util.evaluate_pytorch_model(X_val, X_val_lens, y_val, transformer_model, ouput_dict=True, categories=categories)['macro avg']['f1-score']
         print(f"Achieved metric of {metric}.")
 
         if metric > best_metric:

@@ -466,6 +466,9 @@ def evaluate_model_bias(model, args, evaluation_fn, num_classes_predict=0, categ
     print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
 
 
+"""
+Evaluation helper fn to be used on sklearn models
+"""
 def evaluate_model(X, y, model, output_dict=False, top_n=1):
     if top_n == 1:
         y_pred = model.predict(list(X))
