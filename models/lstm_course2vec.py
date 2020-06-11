@@ -118,7 +118,7 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     hidden_size = 150
     dropout=0.2
     lr = 0.001
-    lstm_model_path = get_lstm_model_path(vec_size, batch_size, num_layers, hidden_size, lr, dropout)
+    lstm_model_path = get_lstm_model_path(vec_size, batch_size, num_layers, hidden_size, lr, dropout, categories)
     lstm_model = LSTMForecaster(vec_size * NUM_FEATURES, util.NUM_CLASSES, num_layers=num_layers, hidden_size=hidden_size, dropout=dropout)
 
     if pretrained_lstm:
@@ -139,8 +139,8 @@ def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top
     util.evaluate_model_bias(lstm_model, course2vec_params, evaluate_model_bias_single_df, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, test=True)
 
 
-def get_lstm_model_path(input_size, batch_size, num_layers, hidden_size, lr, dropout):
-    return f"lstm_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_hidden{hidden_size}_lr{lr}_seq_len{TRAIN_LENGTH}_drop{dropout}.model"
+def get_lstm_model_path(input_size, batch_size, num_layers, hidden_size, lr, dropout, categories):
+    return f"lstm_saved_models/dim{input_size}_batch{batch_size}_layers{num_layers}_hidden{hidden_size}_lr{lr}_seq_len{TRAIN_LENGTH}_drop{dropout}_categories_{categories}.model"
 
 
 def main():
