@@ -1,3 +1,19 @@
+TEST == 10 ==
+
+precision    recall  f1-score   support
+
+EARTHSCI       0.55      0.26      0.35        92
+ENGR       0.71      0.74      0.73       902
+H&S-HUM&ART       0.60      0.48      0.53       456
+H&S-INTERDISC       0.45      0.56      0.50       880
+H&S-NATSCI       0.56      0.48      0.52       380
+H&S-SOCSCI       0.52      0.48      0.50       607
+OTHER       1.00      0.11      0.20         9
+
+accuracy                           0.57      3326
+macro avg       0.63      0.45      0.48      3326
+weighted avg       0.57      0.57      0.56      3326
+
 == 5 ==
 precision    recall  f1-score   support
 

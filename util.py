@@ -10,16 +10,16 @@ import torch
 
 DATA_DIR = os.getcwd() + '/data/'
 BIAS_DIR = os.getcwd() + '/data/bias_testing/'
-MATRIX_FILE = DATA_DIR + 'crs-qtr.vec'
-VOCAB_FILE = DATA_DIR + 'vocab_crs.txt'
-COURSE_FILE = DATA_DIR + 'courselists/dept-CS.txt'
-STUD_FILE = DATA_DIR + 'studlists/major-CS-BS.txt'
-STRM_FILE = DATA_DIR + 'ID_strms.csv'
+
+# Data v1
 COURSE_MAJOR_FILE = DATA_DIR + 'initial_dataset.fthr'
 RAW_DATA_FILE = DATA_DIR + 'course_outcomes.tsv'
 
+# Data v2
 COURSE_OUTCOME_LIST_FILE = DATA_DIR + 'course_outcome_lists.pkl'
 COURSE_OUTCOME_LIST_FILE_AUGMENTED = DATA_DIR + 'course_outcome_lists_augmented_2.pkl'
+
+# Data v2, but predetermined random splits
 COURSE_OUTCOME_LIST_TRAIN_FILE = DATA_DIR + 'course_outcome_lists_train.pkl'
 COURSE_OUTCOME_LIST_VAL_FILE = DATA_DIR + 'course_outcome_lists_val.pkl'
 COURSE_OUTCOME_LIST_TEST_FILE = DATA_DIR + 'course_outcome_lists_test.pkl'
@@ -92,12 +92,15 @@ def vectorize_course_history(srs, vectorizer=None):
         X = vectorizer.transform(course_strings)
     return vectorizer, X.toarray()
 
-# TODO: rename
-def truncate_class(class_string, num_classes):
+
+"""
+DEPRECATED
+Used on old dataset to word tokenize
+"""
+def truncate_class_v1(class_string, num_classes):
     return ','.join(list(class_string.split(','))[:num_classes])
 
-# TODO: rename
-def truncate_class_v2(class_list, num_classes):
+def truncate_class(class_list, num_classes):
     return class_list[:num_classes]
 
 
@@ -118,13 +121,51 @@ def get_vocab():
     return set(df['DEGREE_1'].values)
 
 
-def train_test_split(X, y, df):
-    # train: 2000 -> 2016 inclusive
-    # val: 2017 -> 2018
-    # test: 2019 -> 2020
-    train_date_upper = datetime.date.fromisoformat('2016-12-31')
-    val_date_upper = datetime.date.fromisoformat('2018-12-31')
-    test_date_upper = datetime.date.fromisoformat('2020-12-31')
+"""
+Word tokenizes dataframes, and truncates sequences if specified
+"""
+def tokenize_df(df, num_classes):
+    y = df['ACAD_PLAN_1']
+
+    X = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
+
+    X['course_history'] = X['course_history'].apply(word_tokenize)
+    X['RELATIVE_TERM'] = X['RELATIVE_TERM'].apply(word_tokenize)
+    X['CRSE_GRADE_INPUT'] = X['CRSE_GRADE_INPUT'].apply(word_tokenize)
+
+    if num_classes > 0:
+        X['course_history'] = X['course_history'].apply(truncate_class, args=[num_classes])
+
+    return X, y
+
+"""
+Prepares datasets (same as v2) that are randomly split.
+"""
+def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False, vectorize=False):
+    df_train = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
+    df_val = pd.read_pickle(COURSE_OUTCOME_LIST_VAL_FILE)
+    df_test = pd.read_pickle(COURSE_OUTCOME_LIST_TEST_FILE)
+
+    X_train, y_train = tokenize_df(df_train, num_classes_train)
+    X_val, y_val = tokenize_df(df_val, num_classes_predict)
+    X_test, y_test = tokenize_df(df_test, num_classes_predict)
+
+    if vectorize:
+        vectorizer, X_train = vectorize_course_history(X_train.loc[:, 'course_history'])
+        _, X_val = vectorize_course_history(X_val.loc[:, 'course_history'], vectorizer=vectorizer)
+        _, X_test = vectorize_course_history(X_test.loc[:, 'course_history'], vectorizer=vectorizer)
+        return (X_train, X_val, X_test, y_train, y_val, y_test), vectorizer
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+"""
+Helper fn for prep_dataset_v2 that carries out the date splitting
+"""
+def date_split(X, y, df):
+    train_date_upper = datetime.date.fromisoformat('2016-12-31')  # train: 2000 -> 2016 inclusive
+    val_date_upper = datetime.date.fromisoformat('2018-12-31')  # val: 2017 -> 2018 inclusive
+    test_date_upper = datetime.date.fromisoformat('2020-12-31')  # test: 2019 -> 2020 inclusive
 
     train_indices = []
     val_indices = []
@@ -156,40 +197,10 @@ def word_tokenize(s):
         tokens = tokens[:-1]
     return tokens
 
-# TODO: rename to get rid of v3, and something more descriptive
-def process_df_v3(df, num_classes):
-    y = df['ACAD_PLAN_1']
 
-    X = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
-
-    X['course_history'] = X['course_history'].apply(word_tokenize)
-    X['RELATIVE_TERM'] = X['RELATIVE_TERM'].apply(word_tokenize)
-    X['CRSE_GRADE_INPUT'] = X['CRSE_GRADE_INPUT'].apply(word_tokenize)
-
-    if num_classes > 0:
-        X['course_history'] = X['course_history'].apply(truncate_class_v2, args=[num_classes])
-
-    return X, y
-
-# TODO: rename to just prep_dataset
-def prep_dataset_v3(num_classes_train=-1, num_classes_predict=-1, augmented=False, vectorize=False):
-    df_train = pd.read_pickle(COURSE_OUTCOME_LIST_TRAIN_FILE)
-    df_val = pd.read_pickle(COURSE_OUTCOME_LIST_VAL_FILE)
-    df_test = pd.read_pickle(COURSE_OUTCOME_LIST_TEST_FILE)
-
-    X_train, y_train = process_df_v3(df_train, num_classes_train)
-    X_val, y_val = process_df_v3(df_val, num_classes_predict)
-    X_test, y_test = process_df_v3(df_test, num_classes_predict)
-
-    if vectorize:
-        vectorizer, X_train = vectorize_course_history(X_train.loc[:, 'course_history'])
-        _, X_val = vectorize_course_history(X_val.loc[:, 'course_history'], vectorizer=vectorizer)
-        _, X_test = vectorize_course_history(X_test.loc[:, 'course_history'], vectorizer=vectorizer)
-        return (X_train, X_val, X_test, y_train, y_val, y_test), vectorizer
-
-    return X_train, X_val, X_test, y_train, y_val, y_test
-
-# TODO: rename to draw distinction from v3
+"""
+Prepares datasets that are split by date
+"""
 def prep_dataset_v2(num_classes_train=-1, num_classes_predict=-1, augmented=False):
     if augmented:
         df = pd.read_pickle(COURSE_OUTCOME_LIST_FILE_AUGMENTED)
@@ -197,31 +208,33 @@ def prep_dataset_v2(num_classes_train=-1, num_classes_predict=-1, augmented=Fals
         df = pd.read_pickle(COURSE_OUTCOME_LIST_FILE)
     df['eff_dt_1'] = df['eff_dt_1'].apply(datetime.date.fromisoformat)
 
-    # print(df.columns)
-
     y = df['ACAD_PLAN_1']
     X = df.loc[:, ['course_history', 'RELATIVE_TERM', 'CRSE_GRADE_INPUT']]
 
-    (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices) = train_test_split(X, y, df)
+    (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices) = date_split(X, y, df)
 
     if num_classes_train > 0:
-        X_train['course_history'] = X_train['course_history'].apply(truncate_class_v2, args=[num_classes_train])
-        X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_train])
-        X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_train])
+        X_train['course_history'] = X_train['course_history'].apply(truncate_class, args=[num_classes_train])
+        X_train['RELATIVE_TERM'] = X_train['RELATIVE_TERM'].apply(truncate_class, args=[num_classes_train])
+        X_train['CRSE_GRADE_INPUT'] = X_train['CRSE_GRADE_INPUT'].apply(truncate_class, args=[num_classes_train])
 
     if num_classes_predict > 0:
-        X_val['course_history'] = X_val['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
-        X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
-        X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_val['course_history'] = X_val['course_history'].apply(truncate_class, args=[num_classes_predict])
+        X_val['RELATIVE_TERM'] = X_val['RELATIVE_TERM'].apply(truncate_class, args=[num_classes_predict])
+        X_val['CRSE_GRADE_INPUT'] = X_val['CRSE_GRADE_INPUT'].apply(truncate_class, args=[num_classes_predict])
 
-        X_test['course_history'] = X_test['course_history'].apply(truncate_class_v2, args=[num_classes_predict])
-        X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class_v2, args=[num_classes_predict])
-        X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class_v2, args=[num_classes_predict])
+        X_test['course_history'] = X_test['course_history'].apply(truncate_class, args=[num_classes_predict])
+        X_test['RELATIVE_TERM'] = X_test['RELATIVE_TERM'].apply(truncate_class, args=[num_classes_predict])
+        X_test['CRSE_GRADE_INPUT'] = X_test['CRSE_GRADE_INPUT'].apply(truncate_class, args=[num_classes_predict])
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-# TODO: delete
-def prep_dataset(num_classes_predict=-1, vectorize=False):
+
+"""
+DEPRECATED
+Prepares dataset. Uses first dataset, which has now since been replaced
+"""
+def prep_dataset_v1(num_classes_predict=-1, vectorize=False):
     df = pd.read_feather(COURSE_MAJOR_FILE, use_threads=True)
 
     if vectorize:
@@ -230,7 +243,7 @@ def prep_dataset(num_classes_predict=-1, vectorize=False):
         X = df.loc[:, 'course_history']
     y = df['DEGREE_1']
 
-    (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices) = train_test_split(X, y, df)
+    (X_train, X_val, X_test, y_train, y_val, y_test), (train_indices, val_indices, test_indices) = date_split(X, y, df)
 
     if num_classes_predict > 0:
         df['course_history'] = df['course_history'].apply(truncate_class, args=[num_classes_predict])
@@ -248,8 +261,7 @@ def prep_dataset(num_classes_predict=-1, vectorize=False):
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-# TODO: rename
-# returns list of subtokens
+
 def subtokenize_single_course(course_str):
     match = re.match(r"([^0-9]+)([0-9]+)([^0-9]*)", course_str, re.I)
     items = list(match.groups())
@@ -260,15 +272,36 @@ def subtokenize_single_course(course_str):
         items[2] = items[2][1:]
     return items
 
-# TODO: rename
-# returns list of subtokens
-def subtokenize_single_course_v2(course_str):
-    match = re.match(r"([^0-9]+)([0-9]+)([^0-9]*)", course_str, re.I)
-    items = list(match.groups())
-    items[1] = items[1] + items[2]
-    items = items[:-1]
 
-    return items
+def expand(items, expansion_amounts):
+    return [[items[i]]*expansion_amounts[i] for i in range(len(items))]
+
+
+def subtokenize_feautures_row(row):
+    courses = row["course_history"]
+    terms = row["RELATIVE_TERM"]
+    grades = row["CRSE_GRADE_INPUT"]
+
+    # note: can speed up by returning list of lists of sizes, and use that to vector op expansions of terms and grades
+    subtokenized_courses = [util.subtokenize_single_course(course) for course in courses]
+    expansion_amounts = [len(l) for l in subtokenized_courses]
+    expanded_terms = expand(terms, expansion_amounts)
+    expanded_grades = expand(grades, expansion_amounts)
+
+    row["course_history"] = [item for sublist in subtokenized_courses for item in sublist]
+    row["RELATIVE_TERM"] = [item for sublist in expanded_terms for item in sublist]
+    row["CRSE_GRADE_INPUT"] = [item for sublist in expanded_grades for item in sublist]
+
+    return row
+
+
+def subtokenize_features(df):
+    for index, row in df.iterrows():
+        subtokenized = subtokenize_feautures_row(row)
+        df.loc[index, "course_history"] = subtokenized["course_history"]
+        df.loc[index, "RELATIVE_TERM"] = subtokenized["RELATIVE_TERM"]
+        df.loc[index, "CRSE_GRADE_INPUT"] = subtokenized["CRSE_GRADE_INPUT"]
+    return df
 
 
 """

@@ -1,3 +1,19 @@
+TEST == 10 ==
+
+precision    recall  f1-score   support
+
+1       0.25      0.20      0.22        92
+2       0.69      0.69      0.69       902
+3       0.47      0.44      0.45       456
+4       0.44      0.45      0.44       880
+5       0.48      0.45      0.46       380
+6       0.44      0.48      0.46       607
+7       0.04      0.11      0.06         9
+
+accuracy                           0.51      3326
+macro avg       0.40      0.40      0.40      3326
+weighted avg       0.51      0.51      0.51      3326
+
 
 == 5 ==
 precision    recall  f1-score   support

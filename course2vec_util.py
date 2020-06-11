@@ -27,37 +27,6 @@ def courses2vecs(course_list, course2vec_model, vec_size, max_length):
     vec = np.pad(vec, ((0, padding), (0, 0)), "constant", constant_values=0)[:max_length]
     return np.array(vec)
 
-# TODO: move to util.py
-def expand(items, expansion_amounts):
-    return [[items[i]]*expansion_amounts[i] for i in range(len(items))]
-
-# TODO: move to util.py
-def subtokenize_feautures_row(row):
-    courses = row["course_history"]
-    terms = row["RELATIVE_TERM"]
-    grades = row["CRSE_GRADE_INPUT"]
-
-    # note: can speed up by returning list of lists of sizes, and use that to vector op expansions of terms and grades
-    subtokenized_courses = [util.subtokenize_single_course(course) for course in courses]
-    expansion_amounts = [len(l) for l in subtokenized_courses]
-    expanded_terms = expand(terms, expansion_amounts)
-    expanded_grades = expand(grades, expansion_amounts)
-
-    row["course_history"] = [item for sublist in subtokenized_courses for item in sublist]
-    row["RELATIVE_TERM"] = [item for sublist in expanded_terms for item in sublist]
-    row["CRSE_GRADE_INPUT"] = [item for sublist in expanded_grades for item in sublist]
-
-    return row
-
-# TODO: move to util.py
-def subtokenize_features(df):
-    for index, row in df.iterrows():
-        subtokenized = subtokenize_feautures_row(row)
-        df.loc[index, "course_history"] = subtokenized["course_history"]
-        df.loc[index, "RELATIVE_TERM"] = subtokenized["RELATIVE_TERM"]
-        df.loc[index, "CRSE_GRADE_INPUT"] = subtokenized["CRSE_GRADE_INPUT"]
-    return df
-
 # TODO: rename to be more descriptive of course2vec featurization
 def featurize_student(X, course2vec_model, vec_size, max_length):
     X = X.apply(courses2vecs, args=[course2vec_model, vec_size, max_length])
