@@ -1,0 +1,59 @@
+== 5 ==
+
+precision    recall  f1-score   support
+
+EARTHSCI       0.38      0.17      0.23        77
+EDUCATION       0.00      0.00      0.00         1
+ENGR       0.66      0.72      0.69       882
+H&S       0.00      0.00      0.00         2
+H&S-HUM&ART       0.53      0.39      0.45       462
+H&S-INTERDISC       0.42      0.51      0.46       902
+H&S-NATSCI       0.52      0.42      0.46       368
+H&S-SOCSCI       0.44      0.41      0.42       629
+INDIVIDUAL       0.00      0.00      0.00         1
+INTERDISC       0.00      0.00      0.00         1
+OTHER       0.00      0.00      0.00         1
+
+accuracy                           0.51      3326
+macro avg       0.27      0.24      0.25      3326
+weighted avg       0.51      0.51      0.51      3326
+
+== 10 ==
+
+precision    recall  f1-score   support
+
+EARTHSCI       0.53      0.36      0.43        77
+EDUCATION       0.00      0.00      0.00         1
+ENGR       0.70      0.75      0.72       882
+H&S       0.00      0.00      0.00         2
+H&S-HUM&ART       0.57      0.44      0.49       462
+H&S-INTERDISC       0.45      0.50      0.48       902
+H&S-NATSCI       0.53      0.50      0.52       368
+H&S-SOCSCI       0.49      0.49      0.49       629
+INDIVIDUAL       0.00      0.00      0.00         1
+INTERDISC       0.00      0.00      0.00         1
+OTHER       0.00      0.00      0.00         1
+
+accuracy                           0.55      3326
+macro avg       0.30      0.28      0.28      3326
+weighted avg       0.55      0.55      0.55      3326
+
+
+== 20 ==
+precision    recall  f1-score   support
+
+EARTHSCI       0.62      0.52      0.57        77
+EDUCATION       0.00      0.00      0.00         1
+ENGR       0.81      0.84      0.82       882
+H&S       0.00      0.00      0.00         2
+H&S-HUM&ART       0.68      0.62      0.65       462
+H&S-INTERDISC       0.65      0.66      0.66       902
+H&S-NATSCI       0.69      0.71      0.70       368
+H&S-SOCSCI       0.64      0.65      0.65       629
+INDIVIDUAL       0.00      0.00      0.00         1
+INTERDISC       0.00      0.00      0.00         1
+OTHER       1.00      1.00      1.00         1
+
+accuracy                           0.70      3326
+macro avg       0.46      0.45      0.46      3326
+weighted avg       0.70      0.70      0.70      3326

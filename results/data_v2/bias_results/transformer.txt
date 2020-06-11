@@ -1,0 +1,38 @@
+Predictions@10
+
+Top 1
+
+Macro f1-score for Gender-STEM stereotype dataset: 0.13155557641200633
+Macro f1-score for Gender-STEM anti stereotype dataset: 0.15532091059157282
+Macro f1-score for GPA-STEM stereotype dataset: 0.1483058210452736
+Macro f1-score for GPA-STEM anti-stereotype dataset: 0.13812488497328848
+Macro f1-score for male dataset: 0.12169361792746644
+Macro f1-score for female dataset: 0.11524128253024972
+Macro f1-score for high GPA dataset: 0.11633744471845325
+Macro f1-score for low GPA dataset: 0.12128829755839934
+
+
+
+Top 3
+
+Macro f1-score for Gender-STEM stereotype dataset: 0.24594020598286703
+Macro f1-score for Gender-STEM anti stereotype dataset: 0.24348648242966506
+Macro f1-score for GPA-STEM stereotype dataset: 0.23720247154063642
+Macro f1-score for GPA-STEM anti-stereotype dataset: 0.24274812925331993
+Macro f1-score for male dataset: 0.22415179164323534
+Macro f1-score for female dataset: 0.23015308332798878
+Macro f1-score for high GPA dataset: 0.21888246231468683
+Macro f1-score for low GPA dataset: 0.24265052933767764
+
+
+
+Categories
+
+Macro f1-score for Gender-STEM stereotype dataset: 0.36898161037348115
+Macro f1-score for Gender-STEM anti stereotype dataset: 0.25645036506687624
+Macro f1-score for GPA-STEM stereotype dataset: 0.3559293176854862
+Macro f1-score for GPA-STEM anti-stereotype dataset: 0.27167169995525203
+Macro f1-score for male dataset: 0.26289499013604567
+Macro f1-score for female dataset: 0.24910888886562862
+Macro f1-score for high GPA dataset: 0.2986910569379757
+Macro f1-score for low GPA dataset: 0.22158737133157552
