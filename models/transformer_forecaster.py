@@ -184,7 +184,7 @@ def prep_data(num_classes_train=-1, num_classes_predict=-1, subtokenize=False, a
 def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, categories=False, top_n=1, output_dict=True):
     (course_torchtext, term_torchtext, grade_torchtext) = args
 
-    X, y = util.process_df_v3(df, num_classes_predict)
+    X, y = util.tokenize_df(df, num_classes_predict)
 
     X_lens = util.get_X_lens(X, num_classes_predict)
     X = featurize_data(X, course_torchtext, term_torchtext, grade_torchtext, num_classes_predict)

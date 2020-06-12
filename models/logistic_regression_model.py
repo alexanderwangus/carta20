@@ -24,7 +24,7 @@ def top_n_conversion(y, y_pred):
 
 
 def evaluate_model_bias_single_df(model, df, vectorizer, num_classes_predict=0, categories=False, top_n=1):
-    X, y = util.process_df_v3(df, num_classes_predict)
+    X, y = util.tokenize_df(df, num_classes_predict)
     _, X = util.vectorize_course_history(X.loc[:, 'course_history'], vectorizer=vectorizer)
 
     if categories:

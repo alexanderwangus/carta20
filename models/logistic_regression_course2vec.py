@@ -16,7 +16,7 @@ PREDICT_LENGTH = 10
 
 def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, categories=False, top_n=1):
     course2vec_model, vec_size = args
-    X, y = util.process_df_v3(df, num_classes_predict)
+    X, y = util.tokenize_df(df, num_classes_predict)
 
     X = featurize_student(X['course_history'], course2vec_model, vec_size)
     if categories:

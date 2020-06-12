@@ -71,7 +71,7 @@ class LSTMForecaster(nn.Module):
 
 def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, categories=False, top_n=1, output_dict=True):
     course2vec_params = args
-    X, y = util.process_df_v3(df, num_classes_predict)
+    X, y = util.tokenize_df(df, num_classes_predict)
 
     X_lens = util.get_X_lens(X, course2vec_params['vec_size'])
     X = course2vec_util.featurize_student_v2(X, course2vec_params, num_classes_predict)
