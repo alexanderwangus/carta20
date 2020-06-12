@@ -69,7 +69,7 @@ class LSTMForecaster(nn.Module):
             return top_n_indices
 
 
-def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, categories=False, top_n=1):
+def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, categories=False, top_n=1, output_dict=True):
     course2vec_params = args
     X, y = util.process_df_v3(df, num_classes_predict)
 
@@ -79,7 +79,7 @@ def evaluate_model_bias_single_df(model, df, args, num_classes_predict=0, catego
     if categories:
         y = util.degrees_to_categories(y)
 
-    return deep_model_util.evaluate_pytorch_model(X, X_lens, y, model, output_dict=True, categories=categories, top_n=top_n)
+    return deep_model_util.evaluate_pytorch_model(X, X_lens, y, model, output_dict=output_dict, categories=categories, top_n=top_n)
 
 
 def lstm_course2vec(vec_size, win_size, min_count, epochs, categories=False, top_n=1, pretrained_lstm=False, training_set=None, num_classes_train=-1, num_classes_predict=-1, subtokenize=False):
@@ -147,9 +147,9 @@ def main():
     vec_size=150
     win_size=10
     min_count=1
-    epochs=1
+    epochs=30
     lstm_course2vec(vec_size, win_size, min_count, epochs, pretrained_lstm=False, training_set=None, \
-    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, categories=False, top_n=1)
+    num_classes_train=TRAIN_LENGTH, num_classes_predict=PREDICT_LENGTH, subtokenize=False, categories=True, top_n=1)
 
 if __name__ == '__main__':
     main()

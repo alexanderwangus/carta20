@@ -389,6 +389,13 @@ def evaluate_model_bias(model, args, evaluation_fn, num_classes_predict=0, categ
     print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
 
 
+    gpa_stem_report = evaluation_fn(model, gpa_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
+    gpa_stem_anti_report = evaluation_fn(model, gpa_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
+
+    print(f"Macro f1-score for Gender-STEM stereotype dataset:\n{gender_stem_report}")
+    print(f"Macro f1-score for Gender-STEM anti stereotype dataset:\n{gender_stem_anti_report}")
+
+
 """
 Evaluation helper fn to be used on sklearn models
 """
