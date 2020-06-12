@@ -392,8 +392,8 @@ def evaluate_model_bias(model, args, evaluation_fn, num_classes_predict=0, categ
     gpa_stem_report = evaluation_fn(model, gpa_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
     gpa_stem_anti_report = evaluation_fn(model, gpa_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
 
-    print(f"Macro f1-score for Gender-STEM stereotype dataset:\n{gender_stem_report}")
-    print(f"Macro f1-score for Gender-STEM anti stereotype dataset:\n{gender_stem_anti_report}")
+    print(f"Macro f1-score for GPA-STEM stereotype dataset:\n{gpa_stem_report}")
+    print(f"Macro f1-score for GPA-STEM anti stereotype dataset:\n{gpa_stem_anti_report}")
 
 
 """
