@@ -389,11 +389,25 @@ def evaluate_model_bias(model, args, evaluation_fn, num_classes_predict=0, categ
     print(f"Macro f1-score for low GPA dataset: {low_gpa_report['macro avg']['f1-score']}")
 
 
+    gender_stem_report = evaluation_fn(model, gender_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
+    gender_stem_anti_report = evaluation_fn(model, gender_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
     gpa_stem_report = evaluation_fn(model, gpa_stem_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
     gpa_stem_anti_report = evaluation_fn(model, gpa_stem_anti_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
 
-    print(f"Macro f1-score for GPA-STEM stereotype dataset:\n{gpa_stem_report}")
-    print(f"Macro f1-score for GPA-STEM anti stereotype dataset:\n{gpa_stem_anti_report}")
+    male_report = evaluation_fn(model, male_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
+    female_report = evaluation_fn(model, female_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
+    high_gpa_report = evaluation_fn(model, high_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
+    low_gpa_report = evaluation_fn(model, low_gpa_df, args, num_classes_predict=num_classes_predict, categories=categories, top_n=top_n, output_dict=False)
+
+    print(f"Confusion Matrix for Gender-STEM stereotype dataset:\n{gender_stem_report}")
+    print(f"Confusion Matrix for Gender-STEM anti stereotype dataset:\n{gender_stem_anti_report}")
+    print(f"Confusion Matrix for GPA-STEM stereotype dataset:\n{gpa_stem_report}")
+    print(f"Confusion Matrix for GPA-STEM anti-stereotype dataset:\n{gpa_stem_anti_report}")
+
+    print(f"Confusion Matrix for male dataset:\n{male_report}")
+    print(f"Confusion Matrix for female dataset:\n{female_report}")
+    print(f"Confusion Matrix for high GPA dataset:\n{high_gpa_report}")
+    print(f"Confusion Matrix for low GPA dataset:\n{low_gpa_report}")
 
 
 """
